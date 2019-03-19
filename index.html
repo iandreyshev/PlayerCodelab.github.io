@@ -28,7 +28,7 @@
                   feedback-link="">
     
       <google-codelab-step label="Введение" duration="0">
-        <p class="image-container">В Android мире нет единого подхода к построению архитектуры приложения, но каждый из них старается соответствовать основным принципам к построению архитектуры:</p>
+        <p class="image-container">В Android мире нет единого подхода к построению архитектуры приложения. Каждая команда использует что-то свое и до сих пор на конференциях можно увидеть доклады про использование новой архитектуры. Однако, все подходы схожи в основных принципах:</p>
 <ol type="1" start="1">
 <li>Разбиение проекта на модули, каждый из которых выполняет одну четкую задачу</li>
 <li>Повышение тестируемости</li>
@@ -37,19 +37,23 @@
 <p class="image-container">В этой лабораторной работе мы создадим приложение используя два самых популярных архитектурных паттерна в Android: MVP и MVVM.</p>
 <h3><strong>Чему вы научитесь</strong></h3>
 <ol type="1" start="1">
-<li>Как создавать объекты независимые от жизненного цикла экранов</li>
-<li>Как отделить бизнес-логику от кода UI</li>
-<li>Использовать библиотеку Moxy для реализации MVP</li>
-<li>Использовать библиотеку AAC для реализации MVVM</li>
+<li>Создавать объекты независимые от жизненного цикла экранов</li>
+<li>Отделять бизнес-логику от кода UI</li>
+<li>Использовать библиотеку Moxy для реализации <strong>MVP</strong></li>
+<li>Использовать библиотеку AAC для реализации <strong>MVVM</strong></li>
 <li>Сможете самостоятельно собрать плеер со своими треками и послушать их!</li>
 </ol>
+<p><a href="https://drive.google.com/file/d/1jLS2A1KxcNFPybslrEklDit0Oy_yicse/view?usp=sharing" target="_blank"><paper-button class="colored" raised>Скачать готовое приложение</paper-button></a></p>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Настройка окружения" duration="0">
-        <p class="image-container">Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом.</p>
-<p class="image-container">Проект должен состоять из:</p>
+        <p class="image-container">Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом:</p>
+<pre><code>$ git clone https://github.com/iandreyshev/player-codelab-draft.git</code></pre>
+<p class="image-container">или скачайте ZIP:</p>
+<p><a href="https://github.com/iandreyshev/player-codelab-draft/archive/master.zip" target="_blank"><paper-button class="colored" raised>Скачать ZIP</paper-button></a></p>
+<aside class="warning"><p class="image-container"><strong>Проверка. </strong>Проект должен состоять из:</p>
 <ol type="1" start="1">
 <li>Модуль <strong>app</strong>: содержит код приложения, не использующего библиотеки для реализации архитектурных паттернов</li>
 <li>Модуль <strong>moxy-app</strong>: содержит приложение, использующие библиотеку Moxy для реализации MVP</li>
@@ -57,6 +61,7 @@
 <li>Модуль <strong>model</strong>: содержит модели треклиста  и плеера</li>
 <li>Модуль <strong>utils</strong>: содержит общий код для всех модулей, не привязанный к предметной области</li>
 </ol>
+</aside>
 
 
       </google-codelab-step>
@@ -67,7 +72,7 @@
 <ul>
 <li><strong>Playlist</strong> - содержит список доступных для прослушивания треков (<strong>Track</strong>)</li>
 <li> <strong>Track</strong> - содержит данные о треке (название и длительность), обрабатывает событие выбора трека в плейлисте</li>
-<li><strong>Player </strong>- получает песню для проигрывания и воспроизводит ее. Обрабатывает события <strong>остановки (onStop)</strong>, <strong>запуска (onPlay)</strong>, <strong>паузы (onPause)</strong>, <strong>перезапуска проигрывания (onRestart)</strong> и <strong>перемотки на определенное место (onChangeTimePosition)</strong>.</li>
+<li><strong>Player </strong>- получает песню для проигрывания и воспроизводит ее. Также он может обрабатывать события <strong>остановки (onStop)</strong>, <strong>запуска (onPlay)</strong>, <strong>паузы (onPause)</strong>, <strong>перезапуска проигрывания (onRestart)</strong> и <strong>перемотки на определенное место (onChangeTimePosition)</strong>.</li>
 </ul>
 <p class="image-container">Классы <strong>Playlist </strong>и <strong>Player </strong>позволяют передать им объекты <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter </strong>соответственно, чтобы получать изменения состояния модели.</p>
 <p class="image-container"><strong>IPlaylistPresenter</strong></p>
@@ -80,31 +85,33 @@
 <li><strong><code>updateTimeline(Timeline)</code></strong> - вызывается для уведомления об изменении текущего прогресса проигрывания</li>
 <li><strong><code>updatePlaying(PlayingState)</code></strong><code> -</code> вызывается для уведомления об изменении состояния плеера</li>
 </ul>
-<aside class="warning"><p class="image-container"><strong>Важно.</strong> В рамках этой лабораторной работе классы, содержащиеся в модуле model не должны изменяться.</p>
+<aside class="warning"><p class="image-container"><strong>Важно.</strong> В рамках этой лабораторной работы классы, содержащиеся в модуле model не должны изменяться.</p>
 </aside>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Описание проблемы" duration="0">
-        <p class="image-container">Первостепенной задачей любого архитектурного подхода на Android является отделение кода модели от жизненного цикла элементов UI. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, на котором отображается её информация.</p>
-<p class="image-container">При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>back</strong>, активити на котором он был уничтожается и уже не будет пересоздана. В таком случае модель должна быть тоже уничтожена, чтобы не занимать память устройства.</p>
+      <google-codelab-step label="Отделение модели от жизненного цикла представления" duration="0">
+        <p class="image-container">Одной из основных задач архитектурных подходов на Android является отделение модели от жизненного цикла элементов UI. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, а могла пережить его.</p>
+<p class="image-container">При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>back</strong>, активити на котором он был уничтожается и уже не будет создана заново. В таком случае модель должна быть тоже уничтожена, чтобы не занимать память устройства.</p>
 <p class="image-container"><strong>TODO: рисунок</strong></p>
-<p class="image-container">Отсюда следует, что каким-то образом необходимо следить за жизненным циклом экранов и отписываться от модели, когда пользователь выходит с экрана. Для этого можно использовать методы обратного вызова <strong>onCreate</strong>, <strong>onResume</strong>, <strong>onPause</strong>, <strong>onStart</strong> и т.д.</p>
+<p class="image-container">Отсюда следует, что каким-то образом необходимо следить за жизненным циклом экранов и отписываться от модели, когда пользователь выходит с экрана. При этом иногда приложение может находиться в памяти, но не отображаться, в таком случае модель тоже не должна уничтожаться.</p>
+<p class="image-container">Для слежением за жизненным циклом и своевременной отписки от модели можно использовать методы обратного вызова <strong>onCreate</strong>, <strong>onResume</strong>, <strong>onPause</strong>, <strong>onStart</strong> и т.д.</p>
 <p class="image-container">Для начала реализуем простой <strong>MVP</strong> без использования сторонних библиотек.</p>
 <h2><strong>Создание презентеров</strong></h2>
-<aside class="warning"><p class="image-container">В следующий примерах разработка ведется только в модуле <strong>app</strong></p>
+<aside class="warning"><p class="image-container">В следующий примерах разработка ведется в модуле <strong>app</strong></p>
 </aside>
-<p class="image-container">Чтобы получать обновления от моделей Playlist и Player имплементируем интерфейсы <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter.</strong></p>
+<p class="image-container">Для получения обновления от моделей <strong>Playlist</strong> и <strong>Player</strong> имплементируем интерфейсы <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter.</strong></p>
 <h3><strong>PlayerPresenter.kt</strong></h3>
 <pre><code>class PlayerPresenter(
-   private val resources: Resources,
-   private val player: Player
+   private val resources: Resources
 ) : IPlayerPresenter {
    private var mTitle: String = &#34;&#34;
    private var mTimeline: Timeline = Timeline(0, 0f)
    private var mPlayingState: PlayingState = PlayingState.Disabled
-
+   /*
+   * Если песня не проигрывается, модель пришлет null
+   * */
    override fun updateTitle(title: String?) {
        mTitle = title ?: resources.getString(R.string.player_song_not_selected)
        // TOOD: Добавить обновление представления
@@ -133,107 +140,106 @@
 <p class="image-container">Чтобы обновлять представление необходимо задать его интерфейс. Создадим в классах презентеров интерфейсы IView, которые будут иметь методы для обновления. Здесь же реализуем механизм подписки IView на соответствующий презентер.</p>
 <h3><strong>PlayerPresenter.kt</strong></h3>
 <pre><code>/*
-    * Добавим ассоциативный массив для хранения всех подписанных IView
-    * Флаг будет означать, готова ли IView получать обновления
-    * Подробнее об этом будет написано дальше
-    * */
-    private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
-    private var mTitle: String = &#34;&#34;
-    private var mTimeline: Timeline = Timeline(0, 0f)
-    private var mPlayingState: PlayingState = PlayingState.Disabled
+* Добавим ассоциативный массив для хранения всех подписанных IView
+* Флаг будет означать, готова ли IView получать обновления
+* Подробнее об этом будет написано дальше
+* */
+private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
+private var mTitle: String = &#34;&#34;
+private var mTimeline: Timeline = Timeline(0, 0f)
+private var mPlayingState: PlayingState = PlayingState.Disabled
 
-    fun onAttach(view: IView) {
-        mViewMap[view] = true
+fun onAttach(view: IView) {
+    mViewMap[view] = true
 
+    view.updateTitle(mTitle)
+    val time = mTimeline.timeInMillis.toString()
+    val progress = mTimeline.percent
+    view.updateTimeline(progress, time)
+    view.updatePlaying(mPlayingState)
+}
+
+fun onDetach(view: IView) {
+    if (mViewMap.contains(view)) {
+        mViewMap[view] = false
+    }
+}
+
+fun onFinish(view: IView) {
+    mViewMap.remove(view)
+}
+
+interface IView {
+    fun updateTitle(title: String)
+    fun updateTimeline(progress: Float, currentTime: String)
+    fun updatePlaying(state: PlayingState)
+}</code></pre>
+<h3><strong>PlaylistPresenter.kt</strong></h3>
+<pre><code>private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
+private var mPlaylist = listOf&lt;ITrack&gt;()
+
+fun onAttach(view: IView) {
+    mViewMap[view] = true
+
+    view.updatePlaylist(mPlaylist)
+}
+
+fun onDetach(view: IView) {
+    if (mViewMap.contains(view)) {
+        mViewMap[view] = false
+    }
+}
+
+fun onFinish(view: IView) {
+    mViewMap.remove(view)
+}
+
+interface IView {
+    fun updatePlaylist(playlist: List&lt;ITrack&gt;)
+}</code></pre>
+<p class="image-container">Осталось добавить уведомление IView после изменения данных из модели. Добавьте в классы презентеров следующий код:</p>
+<h3><strong>PlayerPresenter.kt</strong></h3>
+<pre><code>override fun updateTitle(title: String?) {
+    // ...
+    updateView { view -&gt;
         view.updateTitle(mTitle)
+    }
+}
+
+override fun updateTimeline(timeline: Timeline) {
+    // ...
+    updateView { view -&gt;
         val time = mTimeline.timeInMillis.toString()
         val progress = mTimeline.percent
         view.updateTimeline(progress, time)
+    }
+}
+
+override fun updatePlaying(state: PlayingState) {
+    // ...
+    updateView { view -&gt;
         view.updatePlaying(mPlayingState)
     }
+}
 
-    fun onDetach(view: IView) {
-        if (mViewMap.contains(view)) {
-            mViewMap[view] = false
+private fun updateView(updateCallback: (IView) -&gt; Unit) {
+    mViewMap.entries.forEach {
+        if (it.value) {
+            updateCallback(it.key)
         }
-    }
-
-    fun onFinish(view: IView) {
-        mViewMap.remove(view)
-    }
-
-    interface IView {
-        fun updateTitle(title: String)
-        fun updateTimeline(progress: Float, currentTime: String)
-        fun updatePlaying(state: PlayingState)
-    }</code></pre>
-<h3><strong>PlaylistPresenter.kt</strong></h3>
-<pre><code>class PlaylistPresenter : IPlaylistPresenter {
-    private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
-    private var mPlaylist = listOf&lt;ITrack&gt;()
-
-    fun onAttach(view: IView) {
-        mViewMap[view] = true
-
-        view.updatePlaylist(mPlaylist)
-    }
-
-    fun onDetach(view: IView) {
-        if (mViewMap.contains(view)) {
-            mViewMap[view] = false
-        }
-    }
-
-    fun onFinish(view: IView) {
-        mViewMap.remove(view)
-    }
-
-    interface IView {
-        fun updatePlaylist(playlist: List&lt;ITrack&gt;)
     }
 }</code></pre>
-<p class="image-container">Осталось добавить уведомление IView после изменения данных из модели. Заменим комментарии TODO, из примеров выше</p>
-<h3><strong>PlayerPresenter.kt</strong></h3>
-<pre><code>   override fun updateTitle(title: String?) {
-        // ...
-        updateView { view -&gt;
-            view.updateTitle(mTitle)
-        }
-    }
-
-    override fun updateTimeline(timeline: Timeline) {
-        // ...
-        updateView { view -&gt;
-            val time = mTimeline.timeInMillis.toString()
-            val progress = mTimeline.percent
-            view.updateTimeline(progress, time)
-        }
-    }
-
-    override fun updatePlaying(state: PlayingState) {
-        // ...
-        updateView { view -&gt;
-            view.updatePlaying(mPlayingState)
-        }
-    }
-
-    private fun updateView(updateCallback: (IView) -&gt; Unit) {
-        mViewMap.entries.forEach {
-            if (it.value) {
-                updateCallback(it.key)
-            }
-        }
-    }</code></pre>
 <h3><strong>PlaylistPresenter.kt</strong></h3>
 <pre><code>override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
-        // ...
+    // ...
 
-        mViewMap.entries.forEach { entry -&gt;
-            if (entry.value) {
-                entry.key.updatePlaylist(playlist)
-            }
+    mViewMap.entries.forEach { entry -&gt;
+        if (entry.value) {
+            entry.key.updatePlaylist(playlist)
         }
-    }</code></pre>
+    }
+}</code></pre>
+<p class="image-container">Теперь, когда в презентер будет приходить обновление от модели, он передаст их в подписанные на него представления.</p>
 
 
       </google-codelab-step>
