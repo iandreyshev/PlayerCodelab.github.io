@@ -1,0 +1,123 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab title=""
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Введение" duration="0">
+        <p>В Android мире нет единого подхода к построению архитектуры приложения, но каждый из них старается соответствовать основным принципам к построению архитектуры:</p>
+<ol type="1" start="1">
+<li>Разбиение проекта на модули, каждый из которых выполняет одну четкую задачу</li>
+<li>Повышение тестируемости</li>
+<li>Отделение бизнес-логики от UI</li>
+</ol>
+<p>В этой лабораторной работе мы создадим приложение используя два самых популярных архитектурных паттерна в Android: MVP и MVVM.</p>
+<h3><strong>Чему вы научитесь</strong></h3>
+<ol type="1" start="1">
+<li>Как создавать объекты независимые от жизненного цикла экранов</li>
+<li>Как отделить бизнес-логику от кода UI</li>
+<li>Использовать библиотеку Moxy для реализации MVP</li>
+<li>Использовать библиотеку AAC для реализации MVVM</li>
+<li>Сможете самостоятельно собрать плеер со своими треками и послушать их!</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Настройка окружения" duration="0">
+        <p>Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом.</p>
+<p>Проект должен состоять из:</p>
+<ol type="1" start="1">
+<li>Модуль <strong>app</strong>: содержит код приложения, не использующего библиотеки для реализации архитектурных паттернов</li>
+<li>Модуль <strong>moxy-app</strong>: содержит приложение, использующие библиотеку Moxy для реализации MVP</li>
+<li>Модуль <strong>aac-app</strong>: содержит приложение использующее библиотеку Android Architecture Components для реализации MVVM</li>
+<li>Модуль <strong>model</strong>: содержит модели треклиста  и плеера</li>
+<li>Модуль <strong>utils</strong>: содержит общий код для всех модулей, не привязанный к предметной области</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Модель приложения" duration="0">
+        <p>Как выше уже было сказано, классы модели располагаются в модуле <strong>model</strong>.</p>
+<p>Поведение плейлиста и плеера определяется в классах <strong>Playlist</strong> и <strong>Player </strong>соответственно: </p>
+<ul>
+<li><strong>Playlist</strong> - содержит список доступных для прослушивания треков (<strong>Track</strong>)</li>
+<li> <strong>Track</strong> - содержит данные о треке (название и длительность), обрабатывает событие выбора трека в плейлисте</li>
+<li><strong>Player </strong>- получает песню для проигрывания и воспроизводит ее. Обрабатывает события <strong>остановки (onStop)</strong>, <strong>запуска (onPlay)</strong>, <strong>паузы (onPause)</strong>, <strong>перезапуска проигрывания (onRestart)</strong> и <strong>перемотки на определенное место (onChangeTimePosition)</strong>.</li>
+</ul>
+<p>Классы <strong>Playlist </strong>и <strong>Player </strong>позволяют передать им объекты <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter </strong>соответственно, чтобы получать изменения состояния модели.</p>
+<p><strong>IPlaylistPresenter</strong></p>
+<ul>
+<li><strong><code>updatePlaylist(List&lt;ITrack&gt;)</code></strong> - вызывается при смене состояния плейлиста, в реальности вызывается только один раз при подписке презентера на модель</li>
+</ul>
+<p><strong>IPlayerPresenter</strong></p>
+<ul>
+<li><strong><code>updateTitle(String?)</code></strong> - вызывается для уведомления об изменении названия текущего играющего трека</li>
+<li><strong><code>updateTimeline(Timeline)</code></strong> - вызывается для уведомления об изменении текущего прогресса проигрывания</li>
+<li><strong><code>updatePlaying(PlayingState)</code></strong><code> -</code> вызывается для уведомления об изменении состояния плеера</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Внедрение зависимостей" duration="0">
+        
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Обработка пользовательского ввода" duration="0">
+        
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Подписка на изменение модели" duration="0">
+        
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Обновление экрана после изменений модели" duration="0">
+        
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Подключение библиотеки Moxy" duration="0">
+        
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Подключение библиотеки Android Architecture Components" duration="0">
+        
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>
