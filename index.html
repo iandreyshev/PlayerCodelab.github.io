@@ -21,18 +21,20 @@
 </head>
 <body>
   <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
-  <google-codelab title=""
+  <google-codelab codelab-gaid=""
+                  id=""
+                  title=""
                   environment="web"
                   feedback-link="">
     
       <google-codelab-step label="Введение" duration="0">
-        <p>В Android мире нет единого подхода к построению архитектуры приложения, но каждый из них старается соответствовать основным принципам к построению архитектуры:</p>
+        <p class="image-container">В Android мире нет единого подхода к построению архитектуры приложения, но каждый из них старается соответствовать основным принципам к построению архитектуры:</p>
 <ol type="1" start="1">
 <li>Разбиение проекта на модули, каждый из которых выполняет одну четкую задачу</li>
 <li>Повышение тестируемости</li>
 <li>Отделение бизнес-логики от UI</li>
 </ol>
-<p>В этой лабораторной работе мы создадим приложение используя два самых популярных архитектурных паттерна в Android: MVP и MVVM.</p>
+<p class="image-container">В этой лабораторной работе мы создадим приложение используя два самых популярных архитектурных паттерна в Android: MVP и MVVM.</p>
 <h3><strong>Чему вы научитесь</strong></h3>
 <ol type="1" start="1">
 <li>Как создавать объекты независимые от жизненного цикла экранов</li>
@@ -46,8 +48,8 @@
       </google-codelab-step>
     
       <google-codelab-step label="Настройка окружения" duration="0">
-        <p>Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом.</p>
-<p>Проект должен состоять из:</p>
+        <p class="image-container">Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом.</p>
+<p class="image-container">Проект должен состоять из:</p>
 <ol type="1" start="1">
 <li>Модуль <strong>app</strong>: содержит код приложения, не использующего библиотеки для реализации архитектурных паттернов</li>
 <li>Модуль <strong>moxy-app</strong>: содержит приложение, использующие библиотеку Moxy для реализации MVP</li>
@@ -60,40 +62,288 @@
       </google-codelab-step>
     
       <google-codelab-step label="Модель приложения" duration="0">
-        <p>Как выше уже было сказано, классы модели располагаются в модуле <strong>model</strong>.</p>
-<p>Поведение плейлиста и плеера определяется в классах <strong>Playlist</strong> и <strong>Player </strong>соответственно: </p>
+        <p class="image-container">Как выше уже было сказано, классы модели располагаются в модуле <strong>model</strong>.</p>
+<p class="image-container">Поведение плейлиста и плеера определяется в классах <strong>Playlist</strong> и <strong>Player </strong>соответственно: </p>
 <ul>
 <li><strong>Playlist</strong> - содержит список доступных для прослушивания треков (<strong>Track</strong>)</li>
 <li> <strong>Track</strong> - содержит данные о треке (название и длительность), обрабатывает событие выбора трека в плейлисте</li>
 <li><strong>Player </strong>- получает песню для проигрывания и воспроизводит ее. Обрабатывает события <strong>остановки (onStop)</strong>, <strong>запуска (onPlay)</strong>, <strong>паузы (onPause)</strong>, <strong>перезапуска проигрывания (onRestart)</strong> и <strong>перемотки на определенное место (onChangeTimePosition)</strong>.</li>
 </ul>
-<p>Классы <strong>Playlist </strong>и <strong>Player </strong>позволяют передать им объекты <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter </strong>соответственно, чтобы получать изменения состояния модели.</p>
-<p><strong>IPlaylistPresenter</strong></p>
+<p class="image-container">Классы <strong>Playlist </strong>и <strong>Player </strong>позволяют передать им объекты <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter </strong>соответственно, чтобы получать изменения состояния модели.</p>
+<p class="image-container"><strong>IPlaylistPresenter</strong></p>
 <ul>
 <li><strong><code>updatePlaylist(List&lt;ITrack&gt;)</code></strong> - вызывается при смене состояния плейлиста, в реальности вызывается только один раз при подписке презентера на модель</li>
 </ul>
-<p><strong>IPlayerPresenter</strong></p>
+<p class="image-container"><strong>IPlayerPresenter</strong></p>
 <ul>
 <li><strong><code>updateTitle(String?)</code></strong> - вызывается для уведомления об изменении названия текущего играющего трека</li>
 <li><strong><code>updateTimeline(Timeline)</code></strong> - вызывается для уведомления об изменении текущего прогресса проигрывания</li>
 <li><strong><code>updatePlaying(PlayingState)</code></strong><code> -</code> вызывается для уведомления об изменении состояния плеера</li>
 </ul>
+<aside class="warning"><p class="image-container"><strong>Важно.</strong> В рамках этой лабораторной работе классы, содержащиеся в модуле model не должны изменяться.</p>
+</aside>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Внедрение зависимостей" duration="0">
-        
+      <google-codelab-step label="Описание проблемы" duration="0">
+        <p class="image-container">Первостепенной задачей любого архитектурного подхода на Android является отделение кода модели от жизненного цикла элементов UI. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, на котором отображается её информация.</p>
+<p class="image-container">При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>back</strong>, активити на котором он был уничтожается и уже не будет пересоздана. В таком случае модель должна быть тоже уничтожена, чтобы не занимать память устройства.</p>
+<p class="image-container"><strong>TODO: рисунок</strong></p>
+<p class="image-container">Отсюда следует, что каким-то образом необходимо следить за жизненным циклом экранов и отписываться от модели, когда пользователь выходит с экрана. Для этого можно использовать методы обратного вызова <strong>onCreate</strong>, <strong>onResume</strong>, <strong>onPause</strong>, <strong>onStart</strong> и т.д.</p>
+<p class="image-container">Для начала реализуем простой <strong>MVP</strong> без использования сторонних библиотек.</p>
+<h2><strong>Создание презентеров</strong></h2>
+<aside class="warning"><p class="image-container">В следующий примерах разработка ведется только в модуле <strong>app</strong></p>
+</aside>
+<p class="image-container">Чтобы получать обновления от моделей Playlist и Player имплементируем интерфейсы <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter.</strong></p>
+<h3><strong>PlayerPresenter.kt</strong></h3>
+<pre><code>class PlayerPresenter(
+   private val resources: Resources,
+   private val player: Player
+) : IPlayerPresenter {
+   private var mTitle: String = &#34;&#34;
+   private var mTimeline: Timeline = Timeline(0, 0f)
+   private var mPlayingState: PlayingState = PlayingState.Disabled
+
+   override fun updateTitle(title: String?) {
+       mTitle = title ?: resources.getString(R.string.player_song_not_selected)
+       // TOOD: Добавить обновление представления
+   }
+
+   override fun updateTimeline(timeline: Timeline) {
+       mTimeline = timeline
+       // TOOD: Добавить обновление представления
+   }
+
+   override fun updatePlaying(state: PlayingState) {
+       mPlayingState = state
+       // TOOD: Добавить обновление представления
+   }
+}</code></pre>
+<h3><strong>PlaylistPresenter.kt</strong></h3>
+<pre><code>class PlaylistPresenter : IPlaylistPresenter {
+   private var mPlaylist = listOf&lt;ITrack&gt;()
+
+   override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
+       mPlaylist = playlist
+       // TOOD: Добавить обновление представления
+   }
+}</code></pre>
+<p class="image-container">Теперь в приложении появились классы, экземпляры которых могут получать обновления от моделей. Следующим шагом будет подписка представления на презентеры для обновления представления.</p>
+<p class="image-container">Чтобы обновлять представление необходимо задать его интерфейс. Создадим в классах презентеров интерфейсы IView, которые будут иметь методы для обновления. Здесь же реализуем механизм подписки IView на соответствующий презентер.</p>
+<h3><strong>PlayerPresenter.kt</strong></h3>
+<pre><code>/*
+    * Добавим ассоциативный массив для хранения всех подписанных IView
+    * Флаг будет означать, готова ли IView получать обновления
+    * Подробнее об этом будет написано дальше
+    * */
+    private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
+    private var mTitle: String = &#34;&#34;
+    private var mTimeline: Timeline = Timeline(0, 0f)
+    private var mPlayingState: PlayingState = PlayingState.Disabled
+
+    fun onAttach(view: IView) {
+        mViewMap[view] = true
+
+        view.updateTitle(mTitle)
+        val time = mTimeline.timeInMillis.toString()
+        val progress = mTimeline.percent
+        view.updateTimeline(progress, time)
+        view.updatePlaying(mPlayingState)
+    }
+
+    fun onDetach(view: IView) {
+        if (mViewMap.contains(view)) {
+            mViewMap[view] = false
+        }
+    }
+
+    fun onFinish(view: IView) {
+        mViewMap.remove(view)
+    }
+
+    interface IView {
+        fun updateTitle(title: String)
+        fun updateTimeline(progress: Float, currentTime: String)
+        fun updatePlaying(state: PlayingState)
+    }</code></pre>
+<h3><strong>PlaylistPresenter.kt</strong></h3>
+<pre><code>class PlaylistPresenter : IPlaylistPresenter {
+    private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
+    private var mPlaylist = listOf&lt;ITrack&gt;()
+
+    fun onAttach(view: IView) {
+        mViewMap[view] = true
+
+        view.updatePlaylist(mPlaylist)
+    }
+
+    fun onDetach(view: IView) {
+        if (mViewMap.contains(view)) {
+            mViewMap[view] = false
+        }
+    }
+
+    fun onFinish(view: IView) {
+        mViewMap.remove(view)
+    }
+
+    interface IView {
+        fun updatePlaylist(playlist: List&lt;ITrack&gt;)
+    }
+}</code></pre>
+<p class="image-container">Осталось добавить уведомление IView после изменения данных из модели. Заменим комментарии TODO, из примеров выше</p>
+<h3><strong>PlayerPresenter.kt</strong></h3>
+<pre><code>   override fun updateTitle(title: String?) {
+        // ...
+        updateView { view -&gt;
+            view.updateTitle(mTitle)
+        }
+    }
+
+    override fun updateTimeline(timeline: Timeline) {
+        // ...
+        updateView { view -&gt;
+            val time = mTimeline.timeInMillis.toString()
+            val progress = mTimeline.percent
+            view.updateTimeline(progress, time)
+        }
+    }
+
+    override fun updatePlaying(state: PlayingState) {
+        // ...
+        updateView { view -&gt;
+            view.updatePlaying(mPlayingState)
+        }
+    }
+
+    private fun updateView(updateCallback: (IView) -&gt; Unit) {
+        mViewMap.entries.forEach {
+            if (it.value) {
+                updateCallback(it.key)
+            }
+        }
+    }</code></pre>
+<h3><strong>PlaylistPresenter.kt</strong></h3>
+<pre><code>override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
+        // ...
+
+        mViewMap.entries.forEach { entry -&gt;
+            if (entry.value) {
+                entry.key.updatePlaylist(playlist)
+            }
+        }
+    }</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Реализация представления" duration="0">
+        <p class="image-container">Реализацией представлений будут классы активити <strong>PlayerActivity </strong>и <strong>PlaylistActivity</strong>. Причем, <strong>PlaylistActivity</strong> будет реализовывать два интерфейса, потому что играющий трек будет показываться в плейлисте тоже.</p>
+<p class="image-container"><strong>TODO: картинка экрана</strong></p>
+<h3><strong>PlayerActivity.kt</strong></h3>
+<h3><strong>PlaylistActivity.kt</strong></h3>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Подписка на обновление в представлениях" duration="0">
+        <p class="image-container">Так как точкой входа в приложении является активити, то будем получать презентер именно в них. Для этого создадим статические методы в классе <strong>MusicApplication</strong>. <strong>PlayerPresenter </strong>будет создан только один раз, а <strong>PlaylistPresenter </strong>всегда создается новый потому что он используется только в одном экране.</p>
+<h3><strong>MusicApplication.kt</strong></h3>
+<pre><code>class MusicApplication : Application() {
+    private val mRepository = Repository()
+    private val mPlaylist = Playlist(mRepository.getAllSongs(), ::onSelectSong)
+    private val mPlayer = Player(this)
+    private lateinit var mPlayerPresenter: PlayerPresenter
+
+    override fun onCreate() {
+        super.onCreate()
+
+        instance = this
+
+        mPlayerPresenter = PlayerPresenter(instance.resources, instance.mPlayer)
+        instance.mPlayer.subscribe(instance.mPlayerPresenter)
+    }
+
+    private fun onSelectSong(songId: Long) {
+        val songToPlay = mRepository.getSongById(songId) ?: return
+        mPlayer.setSong(songToPlay)
+        mPlayer.onPlay()
+    }
+
+    companion object {
+        private lateinit var instance: MusicApplication
+
+        fun getPlaylistPresenter(): PlaylistPresenter {
+            val presenter = PlaylistPresenter()
+            instance.mPlaylist.subscribe(presenter)
+            return presenter
+        }
+
+        fun getPlayerPresenter(): PlayerPresenter {
+            return instance.mPlayerPresenter
+        }
+    }
+}</code></pre>
+<aside class="special"><p class="image-container">Обычно, внедрением презентеров занимается DI-фреймворк или библиотека реализующая MVP. Для небольшого приложения нормально хранить модели в классе приложения. Минус такого подхода только в том, что модель хранится на протяжении всего жизненного цикла приложения, даже если она не используется.</p>
+</aside>
+<h3><strong>PlayerActivity.kt</strong></h3>
+<pre><code>class PlayerActivity : AppCompatActivity(), PlayerPresenter.IView {
+
+    private val mPlayerPresenter = MusicApplication.getPlayerPresenter()
+
+    override fun onResume() {
+        super.onResume()
+        mPlayerPresenter.onAttach(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mPlayerPresenter.onDetach(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (isFinishing) {
+            mPlayerPresenter.onFinish(this)
+        }
+}</code></pre>
+<h3><strong>PlaylistActivity.kt</strong></h3>
+<pre><code>class PlaylistActivity : AppCompatActivity(), PlaylistPresenter.IView, PlayerPresenter.IView {
+
+    private val mPlaylistPresenter = MusicApplication.getPlaylistPresenter()
+    private val mPlayerPresenter = MusicApplication.getPlayerPresenter()
+
+    override fun onResume() {
+        super.onResume()
+        mPlaylistPresenter.onAttach(this)
+        mPlayerPresenter.onAttach(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mPlaylistPresenter.onDetach(this)
+        mPlayerPresenter.onDetach(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (isFinishing) {
+            mPlaylistPresenter.onFinish(this)
+            mPlayerPresenter.onFinish(this)
+        }
+}</code></pre>
+<p class="image-container">Когда активити переходит в состояние <strong>Resumed</strong> оно готово отрисовывать информацию на экране. В других состояниях активити не будет перерисовываться, поэтому нет необходимости получать уведомления.</p>
+<p class="image-container">В методе <strong>onDestroy </strong>будем проверять, перешло ли активити в состояние Finished, если перешло, то имеет смысл отписаться от презентера. Чтобы экземпляр активити не оставался в памяти, когда экран уже закрыт.</p>
+
 
       </google-codelab-step>
     
       <google-codelab-step label="Обработка пользовательского ввода" duration="0">
-        
+        <p class="image-container">В нашем подходе представление будет иметь ссылку на презентер и передавать ему события пользовательского ввода, затем он преобразует данные и передает их в модель.</p>
 
-      </google-codelab-step>
-    
-      <google-codelab-step label="Подписка на изменение модели" duration="0">
-        
 
       </google-codelab-step>
     
@@ -103,7 +353,8 @@
       </google-codelab-step>
     
       <google-codelab-step label="Подключение библиотеки Moxy" duration="0">
-        
+        <p class="image-container"><img style="width: 602.00px" src="img\9101646e4ed9b54e.gif"></p>
+
 
       </google-codelab-step>
     
