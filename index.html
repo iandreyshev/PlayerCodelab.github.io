@@ -28,21 +28,21 @@
                   feedback-link="">
     
       <google-codelab-step label="Введение" duration="0">
-        <p class="image-container">В Android мире нет единого подхода к построению архитектуры приложения. Каждая команда использует что-то свое и до сих пор на конференциях можно увидеть доклады про использование новой архитектуры. Однако, все подходы схожи в основных принципах:</p>
+        <p class="image-container">В Android мире нет единого подхода к построению архитектуры приложения. Каждая команда использует что-то свое и до сих пор на конференциях можно увидеть доклады про использование новой архитектуры. Однако, все подходы схожи в следующих принципах:</p>
 <ol type="1" start="1">
 <li>Разбиение проекта на модули, каждый из которых выполняет одну четкую задачу</li>
 <li>Повышение тестируемости</li>
 <li>Отделение бизнес-логики от UI</li>
 </ol>
-<p class="image-container">В этой лабораторной работе мы создадим приложение используя два самых популярных архитектурных паттерна в Android: MVP и MVVM.</p>
+<p class="image-container">В этой лабораторной работе мы создадим приложение используя паттерн MVP и посмотрим, как можно отделить код модели приложения от жизненного цикла UI компонентов.</p>
 <h3><strong>Чему вы научитесь</strong></h3>
 <ol type="1" start="1">
-<li>Создавать объекты независимые от жизненного цикла экранов</li>
+<li>Создавать объекты независимые от жизненного цикла UI компонентов</li>
 <li>Отделять бизнес-логику от кода UI</li>
-<li>Использовать библиотеку Moxy для реализации <strong>MVP</strong></li>
-<li>Использовать библиотеку AAC для реализации <strong>MVVM</strong></li>
+<li>Использовать библиотеку <strong>ViewModel</strong> для реализации <strong>MVVM</strong></li>
 <li>Сможете самостоятельно собрать плеер со своими треками и послушать их!</li>
 </ol>
+<p><img style="width: 453.90px" src="img\82ee56d8dbc371aa.png">        </p>
 <p><a href="https://drive.google.com/file/d/1jLS2A1KxcNFPybslrEklDit0Oy_yicse/view?usp=sharing" target="_blank"><paper-button class="colored" raised>Скачать готовое приложение</paper-button></a></p>
 
 
@@ -56,7 +56,6 @@
 <aside class="warning"><p class="image-container"><strong>Проверка. </strong>Проект должен состоять из:</p>
 <ol type="1" start="1">
 <li>Модуль <strong>app</strong>: содержит код приложения, не использующего библиотеки для реализации архитектурных паттернов</li>
-<li>Модуль <strong>moxy-app</strong>: содержит приложение, использующие библиотеку Moxy для реализации MVP</li>
 <li>Модуль <strong>aac-app</strong>: содержит приложение использующее библиотеку Android Architecture Components для реализации MVVM</li>
 <li>Модуль <strong>model</strong>: содержит модели треклиста  и плеера</li>
 <li>Модуль <strong>utils</strong>: содержит общий код для всех модулей, не привязанный к предметной области</li>
@@ -85,15 +84,15 @@
 <li><strong><code>updateTimeline(Timeline)</code></strong> - вызывается для уведомления об изменении текущего прогресса проигрывания</li>
 <li><strong><code>updatePlaying(PlayingState)</code></strong><code> -</code> вызывается для уведомления об изменении состояния плеера</li>
 </ul>
-<aside class="warning"><p class="image-container"><strong>Важно.</strong> В рамках этой лабораторной работы классы, содержащиеся в модуле model не должны изменяться.</p>
+<aside class="warning"><p class="image-container"><strong>Важно.</strong> В рамках этой лабораторной работы классы, содержащиеся в модуле <strong>model </strong>не должны изменяться.</p>
 </aside>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Отделение модели от жизненного цикла представления" duration="0">
-        <p class="image-container">Одной из основных задач архитектурных подходов на Android является отделение модели от жизненного цикла элементов UI. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, а могла пережить его.</p>
-<p class="image-container">При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>back</strong>, активити на котором он был уничтожается и уже не будет создана заново. В таком случае модель должна быть тоже уничтожена, чтобы не занимать память устройства.</p>
+        <p class="image-container">Одной из основных задач архитектурных подходов на Android является <strong>отделение модели от жизненного цикла элементов UI</strong>. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, а могла пережить его.</p>
+<p class="image-container">При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>Back</strong>, активити, на котором он был, уничтожается и уже не будет создана заново. В таком случае модель тоже  должна быть уничтожена, чтобы не занимать память устройства.</p>
 <p class="image-container"><img style="width: 602.00px" src="img\8b8710cbabb6e544.png"></p>
 <p class="image-container">Отсюда следует, что каким-то образом необходимо следить за жизненным циклом экранов и отписываться от модели, когда пользователь выходит с экрана. При этом иногда приложение может находиться в памяти, но не отображаться, в таком случае модель тоже не должна уничтожаться.</p>
 <p class="image-container">Для слежением за жизненным циклом и своевременной отписки от модели можно использовать методы обратного вызова <strong>onCreate</strong>, <strong>onResume</strong>, <strong>onPause</strong>, <strong>onStart</strong> и т.д.</p>
@@ -259,7 +258,7 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
       </google-codelab-step>
     
       <google-codelab-step label="Реализация представления" duration="0">
-        <p class="image-container">Реализацией представлений будут классы активити <strong>PlayerActivity </strong>и <strong>PlaylistActivity</strong>. Причем, <strong>PlaylistActivity</strong> будет реализовывать два интерфейса, потому что играющий трек будет тоже показываться в плейлисте.</p>
+        <p class="image-container">Реализацией представлений будут классы активити <strong>PlayerActivity </strong>и <strong>PlaylistActivity</strong>. Причем, <strong>PlaylistActivity</strong> будет реализовывать два интерфейса, потому что играющий трек будет показываться и в плейлисте тоже.</p>
 <p class="image-container"><img style="width: 602.00px" src="img\870867960cc9024c.png"></p>
 <aside class="special"><p class="image-container">Представлением может быть не только экземпляр <strong>Activity</strong>. Им может быть и обычное <strong>View </strong>или <strong>Fragment</strong>.</p>
 <p class="image-container">Однако в этих случаях для реализации без библиотек пришлось бы писать ещё больше кода. Мы рассмотрим только случай, когда представлениями являются Activity.</p>
@@ -423,10 +422,10 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
         <p class="image-container">Так как представление имеет ссылку на презентер, а презентер имеет ссылку на модель, то будем передавать события пользовательского ввода в презентер.</p>
 <p class="image-container">Добавьте в классы презентеров следующий код, а затем вызов этих методов в соответствующие места в классах активити:</p>
 <h3><strong>PlayerPresenter.kt</strong></h3>
-<pre><code>    fun onPlay() = player.onPlay()
-    fun onStop() = player.onStop()
-    fun onRestart() = player.onRestart()
-    fun onChangeTimePosition(timePercent: Float) = player.onChangeTimelinePosition(timePercent)</code></pre>
+<pre><code>fun onPlay() = player.onPlay()
+fun onStop() = player.onStop()
+fun onRestart() = player.onRestart()
+fun onChangeTimePosition(timePercent: Float) = player.onChangeTimelinePosition(timePercent)</code></pre>
 <h3><strong>PlaylistActivity.kt</strong></h3>
 <pre><code>override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
     tracksList.removeAllViews()
@@ -440,7 +439,7 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
         }
     }
 }</code></pre>
-<h3><strong><em>На примере приведены не все места, в которых можно добавить обработчики. Вам необходимо найти остальные самим =)</em></strong></h3>
+<h3><strong><em>На примере приведены не все места, в которых можно добавить обработчики. Вам необходимо найти остальные самим</em></strong></h3>
 <aside class="special"><p class="image-container">После добавления обработчиков, обязательно запустите приложение и послушайте музыку, оно должно работать</p>
 </aside>
 
