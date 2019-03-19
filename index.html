@@ -50,7 +50,7 @@
     
       <google-codelab-step label="Настройка окружения" duration="0">
         <p class="image-container">Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом:</p>
-<pre><code>$ git clone https://github.com/iandreyshev/player-codelab-draft.git</code></pre>
+<pre>$ git clone https://github.com/iandreyshev/player-codelab-draft.git</pre>
 <p class="image-container">или скачайте ZIP:</p>
 <p><a href="https://github.com/iandreyshev/player-codelab-draft/archive/master.zip" target="_blank"><paper-button class="colored" raised>Скачать ZIP</paper-button></a></p>
 <aside class="warning"><p class="image-container"><strong>Проверка. </strong>Проект должен состоять из:</p>
@@ -94,7 +94,7 @@
       <google-codelab-step label="Отделение модели от жизненного цикла представления" duration="0">
         <p class="image-container">Одной из основных задач архитектурных подходов на Android является отделение модели от жизненного цикла элементов UI. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, а могла пережить его.</p>
 <p class="image-container">При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>back</strong>, активити на котором он был уничтожается и уже не будет создана заново. В таком случае модель должна быть тоже уничтожена, чтобы не занимать память устройства.</p>
-<p class="image-container"><strong>TODO: рисунок</strong></p>
+<p class="image-container"><img style="width: 602.00px" src="img\8b8710cbabb6e544.png"></p>
 <p class="image-container">Отсюда следует, что каким-то образом необходимо следить за жизненным циклом экранов и отписываться от модели, когда пользователь выходит с экрана. При этом иногда приложение может находиться в памяти, но не отображаться, в таком случае модель тоже не должна уничтожаться.</p>
 <p class="image-container">Для слежением за жизненным циклом и своевременной отписки от модели можно использовать методы обратного вызова <strong>onCreate</strong>, <strong>onResume</strong>, <strong>onPause</strong>, <strong>onStart</strong> и т.д.</p>
 <p class="image-container">Для начала реализуем простой <strong>MVP</strong> без использования сторонних библиотек.</p>
@@ -102,6 +102,7 @@
 <aside class="warning"><p class="image-container">В следующий примерах разработка ведется в модуле <strong>app</strong></p>
 </aside>
 <p class="image-container">Для получения обновления от моделей <strong>Playlist</strong> и <strong>Player</strong> имплементируем интерфейсы <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter.</strong></p>
+<h3><strong><em>Классы уже существуют в проекте, их нужно найти и дописать методы</em></strong></h3>
 <h3><strong>PlayerPresenter.kt</strong></h3>
 <pre><code>class PlayerPresenter(
    private val resources: Resources
@@ -145,9 +146,6 @@
 * Подробнее об этом будет написано дальше
 * */
 private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
-private var mTitle: String = &#34;&#34;
-private var mTimeline: Timeline = Timeline(0, 0f)
-private var mPlayingState: PlayingState = PlayingState.Disabled
 
 fun onAttach(view: IView) {
     mViewMap[view] = true
@@ -176,7 +174,6 @@ interface IView {
 }</code></pre>
 <h3><strong>PlaylistPresenter.kt</strong></h3>
 <pre><code>private val mViewMap = mutableMapOf&lt;IView, Boolean&gt;()
-private var mPlaylist = listOf&lt;ITrack&gt;()
 
 fun onAttach(view: IView) {
     mViewMap[view] = true
@@ -199,13 +196,19 @@ interface IView {
 }</code></pre>
 <p class="image-container">Осталось добавить уведомление IView после изменения данных из модели. Добавьте в классы презентеров следующий код:</p>
 <h3><strong>PlayerPresenter.kt</strong></h3>
-<pre><code>override fun updateTitle(title: String?) {
+<pre><code>/*
+* Добавьте в метод недостающий код обновления представлений
+*/
+override fun updateTitle(title: String?) {
     // ...
     updateView { view -&gt;
         view.updateTitle(mTitle)
     }
 }
 
+/*
+* Добавьте в метод недостающий код обновления представлений
+*/
 override fun updateTimeline(timeline: Timeline) {
     // ...
     updateView { view -&gt;
@@ -215,6 +218,9 @@ override fun updateTimeline(timeline: Timeline) {
     }
 }
 
+/*
+* Добавьте в метод недостающий код обновления представлений
+*/
 override fun updatePlaying(state: PlayingState) {
     // ...
     updateView { view -&gt;
@@ -222,6 +228,10 @@ override fun updatePlaying(state: PlayingState) {
     }
 }
 
+/*
+* Этот метод упрощает обход подписанных представлений
+* и обновление их
+*/
 private fun updateView(updateCallback: (IView) -&gt; Unit) {
     mViewMap.entries.forEach {
         if (it.value) {
@@ -230,7 +240,10 @@ private fun updateView(updateCallback: (IView) -&gt; Unit) {
     }
 }</code></pre>
 <h3><strong>PlaylistPresenter.kt</strong></h3>
-<pre><code>override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
+<pre><code>/*
+* Добавьте в метод недостающий код обновления представлений
+*/
+override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
     // ...
 
     mViewMap.entries.forEach { entry -&gt;
@@ -239,22 +252,75 @@ private fun updateView(updateCallback: (IView) -&gt; Unit) {
         }
     }
 }</code></pre>
-<p class="image-container">Теперь, когда в презентер будет приходить обновление от модели, он передаст их в подписанные на него представления.</p>
+<p class="image-container">Теперь, когда в презентер будет приходить обновление от модели, он передаст данные в подписанные на него представления.</p>
+<h3><strong><em>На следующем этапе мы реализуем интерфейсы IView в соответствующих активити</em></strong></h3>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Реализация представления" duration="0">
-        <p class="image-container">Реализацией представлений будут классы активити <strong>PlayerActivity </strong>и <strong>PlaylistActivity</strong>. Причем, <strong>PlaylistActivity</strong> будет реализовывать два интерфейса, потому что играющий трек будет показываться в плейлисте тоже.</p>
-<p class="image-container"><strong>TODO: картинка экрана</strong></p>
+        <p class="image-container">Реализацией представлений будут классы активити <strong>PlayerActivity </strong>и <strong>PlaylistActivity</strong>. Причем, <strong>PlaylistActivity</strong> будет реализовывать два интерфейса, потому что играющий трек будет тоже показываться в плейлисте.</p>
+<p class="image-container"><img style="width: 602.00px" src="img\870867960cc9024c.png"></p>
+<aside class="special"><p class="image-container">Представлением может быть не только экземпляр <strong>Activity</strong>. Им может быть и обычное <strong>View </strong>или <strong>Fragment</strong>.</p>
+<p class="image-container">Однако в этих случаях для реализации без библиотек пришлось бы писать ещё больше кода. Мы рассмотрим только случай, когда представлениями являются Activity.</p>
+</aside>
+<p class="image-container">Унаследуйте <strong>PlayerActivity </strong>от <strong>PlayerPresenter.IView</strong> и перенаправьте переопределенные методы в уже реализованные приватные для обновления View.</p>
 <h3><strong>PlayerActivity.kt</strong></h3>
+<pre><code>class PlayerActivity : AppCompatActivity(), PlayerPresenter.IView {
+
+    override fun updateTitle(title: String) =
+        updateTitleView(title)
+
+    override fun updateTimeline(progress: Float, currentTime: String) =
+        updateTimelineView(progress, currentTime)
+
+    override fun updatePlaying(state: PlayingState) =
+        updatePlayingButtons(state)
+    
+    // Остальной код...
+}</code></pre>
+<p class="image-container">Аналогично в <strong>PlaylistActivity</strong></p>
 <h3><strong>PlaylistActivity.kt</strong></h3>
+<pre><code>class PlaylistActivity : AppCompatActivity(), PlaylistPresenter.IView, PlayerPresenter.IView {
+
+    override fun updatePlaying(state: PlayingState) =
+        updatePlayingButtons(state)
+    
+    /*
+    * Проходим по списку треков и создаем для каждого свой View,
+    * который добавляем в список и назначаем ему обработчик нажатия
+    * */
+    override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
+        tracksList.removeAllViews()
+
+        playlist.forEach { track -&gt;
+            val trackView = layoutInflater.inflate(R.layout.item_track, tracksList, false)
+            tracksList.addView(trackView)
+            trackView.tvTitle.text = track.title
+            // TODO: Добавить обработку клика по треку из списка
+        }
+    }
+
+    override fun updateTitle(title: String) =
+        updateTitleView(title)
+
+    override fun updateTimeline(progress: Float, currentTime: String) = Unit
+    
+    // Остальной код...
+}</code></pre>
+<h3><em>Теперь можно подписать представление на презентеры и менять отображение данных</em></h3>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Подписка на обновление в представлениях" duration="0">
-        <p class="image-container">Так как точкой входа в приложении является активити, то будем получать презентер именно в них. Для этого создадим статические методы в классе <strong>MusicApplication</strong>. <strong>PlayerPresenter </strong>будет создан только один раз, а <strong>PlaylistPresenter </strong>всегда создается новый потому что он используется только в одном экране.</p>
+        <p class="image-container">Теперь необходимо получить в активити нужный презентер и подписаться на его обновления. Для этого создадим статические методы в классе <strong>MusicApplication</strong>. <strong>PlayerPresenter </strong>будет создан только один раз, а <strong>PlaylistPresenter </strong>всегда создается новый потому что он используется только в одном экране.</p>
+<aside class="warning"><p class="image-container">Внимание! Модели инициализируются во время создания экземпляра класса приложения и хранятся в обычных ссылках, значит они будут находится в памяти на протяжении всей работы приложения.</p>
+<p class="image-container">Такой подход является не самым лучшим, но если известно, что в приложении модель будет использоваться на всех экранах, то это нормально.</p>
+</aside>
+<aside class="special"><p class="image-container">Хорошим решением будет использование WeakReference и написание кода внедрения зависимостей или DI-фреймворка, который реализует кеширование и пересоздание объектов. </p>
+</aside>
+<p class="image-container">Напишем класс приложения, который будет хранить модели плейлиста и плеера и иметь статические методы для создания презентеров:</p>
 <h3><strong>MusicApplication.kt</strong></h3>
 <pre><code>class MusicApplication : Application() {
     private val mRepository = Repository()
@@ -267,6 +333,10 @@ private fun updateView(updateCallback: (IView) -&gt; Unit) {
 
         instance = this
 
+        /*
+        * Плеер передается для того чтобы в будущем можно было обрабатывать
+        * события пользовательского ввода
+        * */
         mPlayerPresenter = PlayerPresenter(instance.resources, instance.mPlayer)
         instance.mPlayer.subscribe(instance.mPlayerPresenter)
     }
@@ -291,8 +361,10 @@ private fun updateView(updateCallback: (IView) -&gt; Unit) {
         }
     }
 }</code></pre>
-<aside class="special"><p class="image-container">Обычно, внедрением презентеров занимается DI-фреймворк или библиотека реализующая MVP. Для небольшого приложения нормально хранить модели в классе приложения. Минус такого подхода только в том, что модель хранится на протяжении всего жизненного цикла приложения, даже если она не используется.</p>
+<aside class="special"><p class="image-container">Обычно, внедрением презентеров занимается DI-фреймворк или библиотека реализующая MVP. Для небольшого приложения нормально хранить модели в классе приложения. Минус такого подхода в том, что модель хранится на протяжении всего жизненного цикла приложения, даже если она не используется.</p>
 </aside>
+<p class="image-container">Теперь в классах активити получим ссылки на презентеры и будем подписываться на них в методе <strong>onResume</strong>, а отписываться в методе <strong>onPause</strong>. Это сделано для того, чтобы не обновлять View, когда активити находится не на экране устройства.</p>
+<p class="image-container">В методе <strong>onDestroy</strong>, если у активити был вызван метод <strong>finish()</strong> то окончательно отпишемся от презентера, чтобы он не хранил ссылку иначе может произойти утечка памяти. Если <strong>isFinishing </strong>возвращает <strong>true</strong>, то значит активити уже не будет пересоздано.</p>
 <h3><strong>PlayerActivity.kt</strong></h3>
 <pre><code>class PlayerActivity : AppCompatActivity(), PlayerPresenter.IView {
 
@@ -314,6 +386,7 @@ private fun updateView(updateCallback: (IView) -&gt; Unit) {
         if (isFinishing) {
             mPlayerPresenter.onFinish(this)
         }
+    }
 }</code></pre>
 <h3><strong>PlaylistActivity.kt</strong></h3>
 <pre><code>class PlaylistActivity : AppCompatActivity(), PlaylistPresenter.IView, PlayerPresenter.IView {
@@ -340,32 +413,114 @@ private fun updateView(updateCallback: (IView) -&gt; Unit) {
             mPlaylistPresenter.onFinish(this)
             mPlayerPresenter.onFinish(this)
         }
+    }
 }</code></pre>
-<p class="image-container">Когда активити переходит в состояние <strong>Resumed</strong> оно готово отрисовывать информацию на экране. В других состояниях активити не будет перерисовываться, поэтому нет необходимости получать уведомления.</p>
-<p class="image-container">В методе <strong>onDestroy </strong>будем проверять, перешло ли активити в состояние Finished, если перешло, то имеет смысл отписаться от презентера. Чтобы экземпляр активити не оставался в памяти, когда экран уже закрыт.</p>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Обработка пользовательского ввода" duration="0">
-        <p class="image-container">В нашем подходе представление будет иметь ссылку на презентер и передавать ему события пользовательского ввода, затем он преобразует данные и передает их в модель.</p>
+        <p class="image-container">Так как представление имеет ссылку на презентер, а презентер имеет ссылку на модель, то будем передавать события пользовательского ввода в презентер.</p>
+<p class="image-container">Добавьте в классы презентеров следующий код, а затем вызов этих методов в соответствующие места в классах активити:</p>
+<h3><strong>PlayerPresenter.kt</strong></h3>
+<pre><code>    fun onPlay() = player.onPlay()
+    fun onStop() = player.onStop()
+    fun onRestart() = player.onRestart()
+    fun onChangeTimePosition(timePercent: Float) = player.onChangeTimelinePosition(timePercent)</code></pre>
+<h3><strong>PlaylistActivity.kt</strong></h3>
+<pre><code>override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
+    tracksList.removeAllViews()
+
+    playlist.forEach { track -&gt;
+        val trackView = layoutInflater.inflate(R.layout.item_track, tracksList, false)
+        tracksList.addView(trackView)
+        trackView.tvTitle.text = track.title
+        trackView.setOnClickListener { 
+            track.play()
+        }
+    }
+}</code></pre>
+<h3><strong><em>На примере приведены не все места, в которых можно добавить обработчики. Вам необходимо найти остальные самим =)</em></strong></h3>
+<aside class="special"><p class="image-container">После добавления обработчиков, обязательно запустите приложение и послушайте музыку, оно должно работать</p>
+</aside>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Обновление экрана после изменений модели" duration="0">
-        
+      <google-codelab-step label="Подключение ViewModel из библиотеки Android Architecture Components" duration="0">
+        <p class="image-container">Обработка событий жизненного цикла может создавать много однотипного кода. Чтобы не писать такой код самостоятельно можно использовать компонент из библиотеки Android Jetpack  - ViewModel и LiveData.</p>
+<p class="image-container">ViewModel позволяет иметь объект, который будет переживать пересоздание активити или фрагментов и уничтожаться, когда они уже не будут созданы повторно.</p>
+<p class="image-container">Жизненный цикл <strong>ViewModel</strong></p>
+<p class="image-container"><img style="width: 522.00px" src="img\bd73ebcd0ce5a833.png"></p>
+<p class="image-container">Полезным также может являеться то, что у ViewModel можно переопределить метод <strong>onCleared()</strong>, который вызывается перед уничтожением объекта.</p>
+<aside class="special"><p class="image-container">В методе <strong>onCleared()</strong> удобно производить отписку от моделей, освобождать память от используемых ресурсов</p>
+</aside>
+<p class="image-container">Для подключения библиотеки к проекту, добавьте в <strong>build.gradle модуля aac-app</strong> следующие зависимости:</p>
+<pre><code>implementation &#34;android.arch.lifecycle:runtime:1.1.1&#34;
+implementation &#34;android.arch.lifecycle:extensions:1.1.1&#34;</code></pre>
+<p class="image-container">Затем определим две вью-модели <strong>PlayerViewModel </strong>и <strong>PlaylistViewModel</strong>, чтобы связать их с экземплярами активити, необходимо, чтобы они были унаследованы от <strong>android.arch.lifecycle.ViewModel.</strong></p>
+<p class="image-container"><strong>PlayerViewModel.kt</strong></p>
+<pre><code>class PlayerViewModel : ViewModel(), IPlayerPresenter {
 
-      </google-codelab-step>
+    override fun updateTitle(title: String?) {
+        TODO(&#34;updateTitle not implemented&#34;)
+    }
+
+    override fun updateTimeline(timeline: Timeline) {
+        TODO(&#34;updateTimeline not implemented&#34;)
+    }
+
+    override fun updatePlaying(state: PlayingState) {
+        TODO(&#34;updatePlaying not implemented&#34;)
+    }
+
+}</code></pre>
+<p class="image-container"><strong>PlaylistViewModel.kt</strong></p>
+<pre><code>class PlaylistViewModel : ViewModel(), IPlayerPresenter, IPlaylistPresenter {
+
+    override fun updateTitle(title: String?) {
+        TODO(&#34;updateTitle not implemented&#34;)
+    }
     
-      <google-codelab-step label="Подключение библиотеки Moxy" duration="0">
-        <p class="image-container"><img style="width: 602.00px" src="img\9101646e4ed9b54e.gif"></p>
+    override fun updateTimeline(timeline: Timeline) {
+        TODO(&#34;updateTimeline not implemented&#34;)
+    }
 
+    override fun updatePlaying(state: PlayingState) {
+        TODO(&#34;updatePlaying not implemented&#34;)
+    }
 
-      </google-codelab-step>
+    override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
+        TODO(&#34;updatePlaylist not implemented&#34;)
+    }
+
+}</code></pre>
+<p class="image-container">Теперь внутри классов активити, чтобы получить соответствующий экземпляр вью-модели, напишем следующий код в методе <strong>onCreate()</strong>:</p>
+<pre><code>val viewModel = ViewModelProviders.of(this)
+    .get(PlayerViewModel::class.java)</code></pre>
+<p class="image-container">Так будет получен экземпляр <strong>PlayerViewModel</strong>, который не будет создаваться заново после пересоздания активити, например, при перевороте.</p>
+<aside class="warning"><p class="image-container"><strong>Внимание.</strong> Не стоит передавать в экземпляр ViewModel ссылку на Context (активити тоже Context), потому что их жизненный цикл короче, чем жизненный цикл ViewModel и может произойти утечка памяти.</p>
+</aside>
+<p class="image-container">Общаться из ViewModel с активити можно используя класс <strong>LiveData</strong>:</p>
+<h3><strong>PlayerViewModel.kt</strong></h3>
+<pre><code>class PlayerViewModel : ViewModel(), IPlayerPresenter {
     
-      <google-codelab-step label="Подключение библиотеки Android Architecture Components" duration="0">
-        
+    val trackTitle = MutableLiveData&lt;String&gt;()
+
+    override fun updateTitle(title: String?) {
+        trackTitle.value = title
+    }
+
+    // ...
+}</code></pre>
+<h3><strong>PlayerActivity.kt</strong></h3>
+<pre><code>val viewModel = ViewModelProviders.of(this)
+    .get(PlayerViewModel::class.java)
+
+viewModel.trackTitle.observe(this, Observer { newTitle -&gt;
+    updateTitleView(newTitle.orEmpty())
+})</code></pre>
+
 
       </google-codelab-step>
     
