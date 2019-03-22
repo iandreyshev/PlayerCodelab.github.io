@@ -21,20 +21,18 @@
 </head>
 <body>
   <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
-  <google-codelab codelab-gaid=""
-                  id=""
-                  title=""
+  <google-codelab title=""
                   environment="web"
                   feedback-link="">
     
       <google-codelab-step label="Введение" duration="0">
-        <p class="image-container">В Android мире нет единого подхода к построению архитектуры приложения. Каждая команда использует что-то свое и до сих пор на конференциях можно увидеть доклады про использование новой архитектуры. Однако, все подходы схожи в следующих принципах:</p>
+        <p>В Android мире нет единого подхода к построению архитектуры приложения. Каждая команда использует что-то свое и до сих пор на конференциях можно увидеть доклады про использование новой архитектуры. Однако, все подходы схожи в следующих принципах:</p>
 <ol type="1" start="1">
 <li>Разбиение проекта на модули, каждый из которых выполняет одну четкую задачу</li>
 <li>Повышение тестируемости</li>
 <li>Отделение бизнес-логики от UI</li>
 </ol>
-<p class="image-container">В этой лабораторной работе мы создадим приложение используя паттерн MVP и посмотрим, как можно отделить код модели приложения от жизненного цикла UI компонентов.</p>
+<p>В этой лабораторной работе мы создадим приложение используя паттерн MVP и посмотрим, как можно отделить код модели приложения от жизненного цикла UI компонентов.</p>
 <h3><strong>Чему вы научитесь</strong></h3>
 <ol type="1" start="1">
 <li>Создавать объекты независимые от жизненного цикла UI компонентов</li>
@@ -49,11 +47,11 @@
       </google-codelab-step>
     
       <google-codelab-step label="Настройка окружения" duration="0">
-        <p class="image-container">Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом:</p>
+        <p>Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом:</p>
 <pre>$ git clone https://github.com/iandreyshev/player-codelab-draft.git</pre>
-<p class="image-container">или скачайте ZIP:</p>
+<p>или скачайте ZIP:</p>
 <p><a href="https://github.com/iandreyshev/player-codelab-draft/archive/master.zip" target="_blank"><paper-button class="colored" raised>Скачать ZIP</paper-button></a></p>
-<aside class="warning"><p class="image-container"><strong>Проверка. </strong>Проект должен состоять из:</p>
+<aside class="warning"><p><strong>Проверка. </strong>Проект должен состоять из:</p>
 <ol type="1" start="1">
 <li>Модуль <strong>app</strong>: содержит код приложения, не использующего библиотеки для реализации архитектурных паттернов</li>
 <li>Модуль <strong>aac-app</strong>: содержит приложение использующее библиотеку Android Architecture Components для реализации MVVM</li>
@@ -66,41 +64,41 @@
       </google-codelab-step>
     
       <google-codelab-step label="Модель приложения" duration="0">
-        <p class="image-container">Как выше уже было сказано, классы модели располагаются в модуле <strong>model</strong>.</p>
-<p class="image-container">Поведение плейлиста и плеера определяется в классах <strong>Playlist</strong> и <strong>Player </strong>соответственно: </p>
+        <p>Как выше уже было сказано, классы модели располагаются в модуле <strong>model</strong>.</p>
+<p>Поведение плейлиста и плеера определяется в классах <strong>Playlist</strong> и <strong>Player </strong>соответственно: </p>
 <ul>
 <li><strong>Playlist</strong> - содержит список доступных для прослушивания треков (<strong>Track</strong>)</li>
 <li> <strong>Track</strong> - содержит данные о треке (название и длительность), обрабатывает событие выбора трека в плейлисте</li>
 <li><strong>Player </strong>- получает песню для проигрывания и воспроизводит ее. Также он может обрабатывать события <strong>остановки (onStop)</strong>, <strong>запуска (onPlay)</strong>, <strong>паузы (onPause)</strong>, <strong>перезапуска проигрывания (onRestart)</strong> и <strong>перемотки на определенное место (onChangeTimePosition)</strong>.</li>
 </ul>
-<p class="image-container">Классы <strong>Playlist </strong>и <strong>Player </strong>позволяют передать им объекты <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter </strong>соответственно, чтобы получать изменения состояния модели.</p>
-<p class="image-container"><strong>IPlaylistPresenter</strong></p>
+<p>Классы <strong>Playlist </strong>и <strong>Player </strong>позволяют передать им объекты <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter </strong>соответственно, чтобы получать изменения состояния модели.</p>
+<p><strong>IPlaylistPresenter</strong></p>
 <ul>
 <li><strong><code>updatePlaylist(List&lt;ITrack&gt;)</code></strong> - вызывается при смене состояния плейлиста, в реальности вызывается только один раз при подписке презентера на модель</li>
 </ul>
-<p class="image-container"><strong>IPlayerPresenter</strong></p>
+<p><strong>IPlayerPresenter</strong></p>
 <ul>
 <li><strong><code>updateTitle(String?)</code></strong> - вызывается для уведомления об изменении названия текущего играющего трека</li>
 <li><strong><code>updateTimeline(Timeline)</code></strong> - вызывается для уведомления об изменении текущего прогресса проигрывания</li>
 <li><strong><code>updatePlaying(PlayingState)</code></strong><code> -</code> вызывается для уведомления об изменении состояния плеера</li>
 </ul>
-<aside class="warning"><p class="image-container"><strong>Важно.</strong> В рамках этой лабораторной работы классы, содержащиеся в модуле <strong>model </strong>не должны изменяться.</p>
+<aside class="warning"><p><strong>Важно.</strong> В рамках этой лабораторной работы классы, содержащиеся в модуле <strong>model </strong>не должны изменяться.</p>
 </aside>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Отделение модели от жизненного цикла представления" duration="0">
-        <p class="image-container">Одной из основных задач архитектурных подходов на Android является <strong>отделение модели от жизненного цикла элементов UI</strong>. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, а могла пережить его.</p>
-<p class="image-container">При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>Back</strong>, активити, на котором он был, уничтожается и уже не будет создана заново. В таком случае модель тоже  должна быть уничтожена, чтобы не занимать память устройства.</p>
-<p class="image-container"><img style="width: 602.00px" src="img\8b8710cbabb6e544.png"></p>
-<p class="image-container">Отсюда следует, что каким-то образом необходимо следить за жизненным циклом экранов и отписываться от модели, когда пользователь выходит с экрана. При этом иногда приложение может находиться в памяти, но не отображаться, в таком случае модель тоже не должна уничтожаться.</p>
-<p class="image-container">Для слежением за жизненным циклом и своевременной отписки от модели можно использовать методы обратного вызова <strong>onCreate</strong>, <strong>onResume</strong>, <strong>onPause</strong>, <strong>onStart</strong> и т.д.</p>
-<p class="image-container">Для начала реализуем простой <strong>MVP</strong> без использования сторонних библиотек.</p>
+        <p>Одной из основных задач архитектурных подходов на Android является <strong>отделение модели от жизненного цикла элементов UI</strong>. Так как экран пересоздается даже при перевороте устройства, необходимо хранить модель в таком месте, чтобы она не создавалась заново вместе с экраном, а могла пережить его.</p>
+<p>При этом, должны обрабатываться события выхода из экрана. Например, если пользователь закрывает экран нажатием <strong>Back</strong>, активити, на котором он был, уничтожается и уже не будет создана заново. В таком случае модель тоже  должна быть уничтожена, чтобы не занимать память устройства.</p>
+<p><img style="width: 602.00px" src="img\8b8710cbabb6e544.png"></p>
+<p>Отсюда следует, что каким-то образом необходимо следить за жизненным циклом экранов и отписываться от модели, когда пользователь выходит с экрана. При этом иногда приложение может находиться в памяти, но не отображаться, в таком случае модель тоже не должна уничтожаться.</p>
+<p>Для слежением за жизненным циклом и своевременной отписки от модели можно использовать методы обратного вызова <strong>onCreate</strong>, <strong>onResume</strong>, <strong>onPause</strong>, <strong>onStart</strong> и т.д.</p>
+<p>Для начала реализуем простой <strong>MVP</strong> без использования сторонних библиотек.</p>
 <h2><strong>Создание презентеров</strong></h2>
-<aside class="warning"><p class="image-container">В следующий примерах разработка ведется в модуле <strong>app</strong></p>
+<aside class="warning"><p>В следующий примерах разработка ведется в модуле <strong>app</strong></p>
 </aside>
-<p class="image-container">Для получения обновления от моделей <strong>Playlist</strong> и <strong>Player</strong> имплементируем интерфейсы <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter.</strong></p>
+<p>Для получения обновления от моделей <strong>Playlist</strong> и <strong>Player</strong> имплементируем интерфейсы <strong>IPlaylistPresenter </strong>и <strong>IPlayerPresenter.</strong></p>
 <h3><strong><em>Классы уже существуют в проекте, их нужно найти и дописать методы</em></strong></h3>
 <h3><strong>PlayerPresenter.kt</strong></h3>
 <pre><code>class PlayerPresenter(
@@ -136,8 +134,8 @@
        // TOOD: Добавить обновление представления
    }
 }</code></pre>
-<p class="image-container">Теперь в приложении появились классы, экземпляры которых могут получать обновления от моделей. Следующим шагом будет подписка представления на презентеры для обновления представления.</p>
-<p class="image-container">Чтобы обновлять представление необходимо задать его интерфейс. Создадим в классах презентеров интерфейсы IView, которые будут иметь методы для обновления. Здесь же реализуем механизм подписки IView на соответствующий презентер.</p>
+<p>Теперь в приложении появились классы, экземпляры которых могут получать обновления от моделей. Следующим шагом будет подписка представления на презентеры для обновления представления.</p>
+<p>Чтобы обновлять представление необходимо задать его интерфейс. Создадим в классах презентеров интерфейсы IView, которые будут иметь методы для обновления. Здесь же реализуем механизм подписки IView на соответствующий презентер.</p>
 <h3><strong>PlayerPresenter.kt</strong></h3>
 <pre><code>/*
 * Добавим ассоциативный массив для хранения всех подписанных IView
@@ -193,7 +191,7 @@ fun onFinish(view: IView) {
 interface IView {
     fun updatePlaylist(playlist: List&lt;ITrack&gt;)
 }</code></pre>
-<p class="image-container">Осталось добавить уведомление IView после изменения данных из модели. Добавьте в классы презентеров следующий код:</p>
+<p>Осталось добавить уведомление IView после изменения данных из модели. Добавьте в классы презентеров следующий код:</p>
 <h3><strong>PlayerPresenter.kt</strong></h3>
 <pre><code>/*
 * Добавьте в метод недостающий код обновления представлений
@@ -251,19 +249,19 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
         }
     }
 }</code></pre>
-<p class="image-container">Теперь, когда в презентер будет приходить обновление от модели, он передаст данные в подписанные на него представления.</p>
+<p>Теперь, когда в презентер будет приходить обновление от модели, он передаст данные в подписанные на него представления.</p>
 <h3><strong><em>На следующем этапе мы реализуем интерфейсы IView в соответствующих активити</em></strong></h3>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Реализация представления" duration="0">
-        <p class="image-container">Реализацией представлений будут классы активити <strong>PlayerActivity </strong>и <strong>PlaylistActivity</strong>. Причем, <strong>PlaylistActivity</strong> будет реализовывать два интерфейса, потому что играющий трек будет показываться и в плейлисте тоже.</p>
-<p class="image-container"><img style="width: 602.00px" src="img\870867960cc9024c.png"></p>
-<aside class="special"><p class="image-container">Представлением может быть не только экземпляр <strong>Activity</strong>. Им может быть и обычное <strong>View </strong>или <strong>Fragment</strong>.</p>
-<p class="image-container">Однако в этих случаях для реализации без библиотек пришлось бы писать ещё больше кода. Мы рассмотрим только случай, когда представлениями являются Activity.</p>
+        <p>Реализацией представлений будут классы активити <strong>PlayerActivity </strong>и <strong>PlaylistActivity</strong>. Причем, <strong>PlaylistActivity</strong> будет реализовывать два интерфейса, потому что играющий трек будет показываться и в плейлисте тоже.</p>
+<p><img style="width: 602.00px" src="img\870867960cc9024c.png"></p>
+<aside class="special"><p>Представлением может быть не только экземпляр <strong>Activity</strong>. Им может быть и обычное <strong>View </strong>или <strong>Fragment</strong>.</p>
+<p>Однако в этих случаях для реализации без библиотек пришлось бы писать ещё больше кода. Мы рассмотрим только случай, когда представлениями являются Activity.</p>
 </aside>
-<p class="image-container">Унаследуйте <strong>PlayerActivity </strong>от <strong>PlayerPresenter.IView</strong> и перенаправьте переопределенные методы в уже реализованные приватные для обновления View.</p>
+<p>Унаследуйте <strong>PlayerActivity </strong>от <strong>PlayerPresenter.IView</strong> и перенаправьте переопределенные методы в уже реализованные приватные для обновления View.</p>
 <h3><strong>PlayerActivity.kt</strong></h3>
 <pre><code>class PlayerActivity : AppCompatActivity(), PlayerPresenter.IView {
 
@@ -278,7 +276,7 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
     
     // Остальной код...
 }</code></pre>
-<p class="image-container">Аналогично в <strong>PlaylistActivity</strong></p>
+<p>Аналогично в <strong>PlaylistActivity</strong></p>
 <h3><strong>PlaylistActivity.kt</strong></h3>
 <pre><code>class PlaylistActivity : AppCompatActivity(), PlaylistPresenter.IView, PlayerPresenter.IView {
 
@@ -313,13 +311,13 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
       </google-codelab-step>
     
       <google-codelab-step label="Подписка на обновление в представлениях" duration="0">
-        <p class="image-container">Теперь необходимо получить в активити нужный презентер и подписаться на его обновления. Для этого создадим статические методы в классе <strong>MusicApplication</strong>. <strong>PlayerPresenter </strong>будет создан только один раз, а <strong>PlaylistPresenter </strong>всегда создается новый потому что он используется только в одном экране.</p>
-<aside class="warning"><p class="image-container">Внимание! Модели инициализируются во время создания экземпляра класса приложения и хранятся в обычных ссылках, значит они будут находится в памяти на протяжении всей работы приложения.</p>
-<p class="image-container">Такой подход является не самым лучшим, но если известно, что в приложении модель будет использоваться на всех экранах, то это нормально.</p>
+        <p>Теперь необходимо получить в активити нужный презентер и подписаться на его обновления. Для этого создадим статические методы в классе <strong>MusicApplication</strong>. <strong>PlayerPresenter </strong>будет создан только один раз, а <strong>PlaylistPresenter </strong>всегда создается новый потому что он используется только в одном экране.</p>
+<aside class="warning"><p>Внимание! Модели инициализируются во время создания экземпляра класса приложения и хранятся в обычных ссылках, значит они будут находится в памяти на протяжении всей работы приложения.</p>
+<p>Такой подход является не самым лучшим, но если известно, что в приложении модель будет использоваться на всех экранах, то это нормально.</p>
 </aside>
-<aside class="special"><p class="image-container">Хорошим решением будет использование WeakReference и написание кода внедрения зависимостей или DI-фреймворка, который реализует кеширование и пересоздание объектов. </p>
+<aside class="special"><p>Хорошим решением будет использование WeakReference и написание кода внедрения зависимостей или DI-фреймворка, который реализует кеширование и пересоздание объектов. </p>
 </aside>
-<p class="image-container">Напишем класс приложения, который будет хранить модели плейлиста и плеера и иметь статические методы для создания презентеров:</p>
+<p>Напишем класс приложения, который будет хранить модели плейлиста и плеера и иметь статические методы для создания презентеров:</p>
 <h3><strong>MusicApplication.kt</strong></h3>
 <pre><code>class MusicApplication : Application() {
     private val mRepository = Repository()
@@ -360,10 +358,10 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
         }
     }
 }</code></pre>
-<aside class="special"><p class="image-container">Обычно, внедрением презентеров занимается DI-фреймворк или библиотека реализующая MVP. Для небольшого приложения нормально хранить модели в классе приложения. Минус такого подхода в том, что модель хранится на протяжении всего жизненного цикла приложения, даже если она не используется.</p>
+<aside class="special"><p>Обычно, внедрением презентеров занимается DI-фреймворк или библиотека реализующая MVP. Для небольшого приложения нормально хранить модели в классе приложения. Минус такого подхода в том, что модель хранится на протяжении всего жизненного цикла приложения, даже если она не используется.</p>
 </aside>
-<p class="image-container">Теперь в классах активити получим ссылки на презентеры и будем подписываться на них в методе <strong>onResume</strong>, а отписываться в методе <strong>onPause</strong>. Это сделано для того, чтобы не обновлять View, когда активити находится не на экране устройства.</p>
-<p class="image-container">В методе <strong>onDestroy</strong>, если у активити был вызван метод <strong>finish()</strong> то окончательно отпишемся от презентера, чтобы он не хранил ссылку иначе может произойти утечка памяти. Если <strong>isFinishing </strong>возвращает <strong>true</strong>, то значит активити уже не будет пересоздано.</p>
+<p>Теперь в классах активити получим ссылки на презентеры и будем подписываться на них в методе <strong>onResume</strong>, а отписываться в методе <strong>onPause</strong>. Это сделано для того, чтобы не обновлять View, когда активити находится не на экране устройства.</p>
+<p>В методе <strong>onDestroy</strong>, если у активити был вызван метод <strong>finish()</strong> то окончательно отпишемся от презентера, чтобы он не хранил ссылку иначе может произойти утечка памяти. Если <strong>isFinishing </strong>возвращает <strong>true</strong>, то значит активити уже не будет пересоздано.</p>
 <h3><strong>PlayerActivity.kt</strong></h3>
 <pre><code>class PlayerActivity : AppCompatActivity(), PlayerPresenter.IView {
 
@@ -419,8 +417,8 @@ override fun updatePlaylist(playlist: List&lt;ITrack&gt;) {
       </google-codelab-step>
     
       <google-codelab-step label="Обработка пользовательского ввода" duration="0">
-        <p class="image-container">Так как представление имеет ссылку на презентер, а презентер имеет ссылку на модель, то будем передавать события пользовательского ввода в презентер.</p>
-<p class="image-container">Добавьте в классы презентеров следующий код, а затем вызов этих методов в соответствующие места в классах активити:</p>
+        <p>Так как представление имеет ссылку на презентер, а презентер имеет ссылку на модель, то будем передавать события пользовательского ввода в презентер.</p>
+<p>Добавьте в классы презентеров следующий код, а затем вызов этих методов в соответствующие места в классах активити:</p>
 <h3><strong>PlayerPresenter.kt</strong></h3>
 <pre><code>fun onPlay() = player.onPlay()
 fun onStop() = player.onStop()
@@ -440,25 +438,25 @@ fun onChangeTimePosition(timePercent: Float) = player.onChangeTimelinePosition(t
     }
 }</code></pre>
 <h3><strong><em>На примере приведены не все места, в которых можно добавить обработчики. Вам необходимо найти остальные самим</em></strong></h3>
-<aside class="special"><p class="image-container">После добавления обработчиков, обязательно запустите приложение и послушайте музыку, оно должно работать</p>
+<aside class="special"><p>После добавления обработчиков, обязательно запустите приложение и послушайте музыку, оно должно работать</p>
 </aside>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Подключение ViewModel из библиотеки Android Architecture Components" duration="0">
-        <p class="image-container">Обработка событий жизненного цикла может создавать много однотипного кода. Чтобы не писать такой код самостоятельно можно использовать компонент из библиотеки Android Jetpack  - ViewModel и LiveData.</p>
-<p class="image-container">ViewModel позволяет иметь объект, который будет переживать пересоздание активити или фрагментов и уничтожаться, когда они уже не будут созданы повторно.</p>
-<p class="image-container">Жизненный цикл <strong>ViewModel</strong></p>
-<p class="image-container"><img style="width: 522.00px" src="img\bd73ebcd0ce5a833.png"></p>
-<p class="image-container">Полезным также может являеться то, что у ViewModel можно переопределить метод <strong>onCleared()</strong>, который вызывается перед уничтожением объекта.</p>
-<aside class="special"><p class="image-container">В методе <strong>onCleared()</strong> удобно производить отписку от моделей, освобождать память от используемых ресурсов</p>
+        <p>Обработка событий жизненного цикла может создавать много однотипного кода. Чтобы не писать такой код самостоятельно можно использовать компонент из библиотеки Android Jetpack  - ViewModel и LiveData.</p>
+<p>ViewModel позволяет иметь объект, который будет переживать пересоздание активити или фрагментов и уничтожаться, когда они уже не будут созданы повторно.</p>
+<p>Жизненный цикл <strong>ViewModel</strong></p>
+<p><img style="width: 522.00px" src="img\bd73ebcd0ce5a833.png"></p>
+<p>Полезным также может являеться то, что у ViewModel можно переопределить метод <strong>onCleared()</strong>, который вызывается перед уничтожением объекта.</p>
+<aside class="special"><p>В методе <strong>onCleared()</strong> удобно производить отписку от моделей, освобождать память от используемых ресурсов</p>
 </aside>
-<p class="image-container">Для подключения библиотеки к проекту, добавьте в <strong>build.gradle модуля aac-app</strong> следующие зависимости:</p>
+<p>Для подключения библиотеки к проекту, добавьте в <strong>build.gradle модуля aac-app</strong> следующие зависимости:</p>
 <pre><code>implementation &#34;android.arch.lifecycle:runtime:1.1.1&#34;
 implementation &#34;android.arch.lifecycle:extensions:1.1.1&#34;</code></pre>
-<p class="image-container">Затем определим две вью-модели <strong>PlayerViewModel </strong>и <strong>PlaylistViewModel</strong>, чтобы связать их с экземплярами активити, необходимо, чтобы они были унаследованы от <strong>android.arch.lifecycle.ViewModel.</strong></p>
-<p class="image-container"><strong>PlayerViewModel.kt</strong></p>
+<p>Затем определим две вью-модели <strong>PlayerViewModel </strong>и <strong>PlaylistViewModel</strong>, чтобы связать их с экземплярами активити, необходимо, чтобы они были унаследованы от <strong>android.arch.lifecycle.ViewModel.</strong></p>
+<p><strong>PlayerViewModel.kt</strong></p>
 <pre><code>class PlayerViewModel : ViewModel(), IPlayerPresenter {
 
     override fun updateTitle(title: String?) {
@@ -474,7 +472,7 @@ implementation &#34;android.arch.lifecycle:extensions:1.1.1&#34;</code></pre>
     }
 
 }</code></pre>
-<p class="image-container"><strong>PlaylistViewModel.kt</strong></p>
+<p><strong>PlaylistViewModel.kt</strong></p>
 <pre><code>class PlaylistViewModel : ViewModel(), IPlayerPresenter, IPlaylistPresenter {
 
     override fun updateTitle(title: String?) {
@@ -494,13 +492,13 @@ implementation &#34;android.arch.lifecycle:extensions:1.1.1&#34;</code></pre>
     }
 
 }</code></pre>
-<p class="image-container">Теперь внутри классов активити, чтобы получить соответствующий экземпляр вью-модели, напишем следующий код в методе <strong>onCreate()</strong>:</p>
+<p>Теперь внутри классов активити, чтобы получить соответствующий экземпляр вью-модели, напишем следующий код в методе <strong>onCreate()</strong>:</p>
 <pre><code>val viewModel = ViewModelProviders.of(this)
     .get(PlayerViewModel::class.java)</code></pre>
-<p class="image-container">Так будет получен экземпляр <strong>PlayerViewModel</strong>, который не будет создаваться заново после пересоздания активити, например, при перевороте.</p>
-<aside class="warning"><p class="image-container"><strong>Внимание.</strong> Не стоит передавать в экземпляр ViewModel ссылку на Context (активити тоже Context), потому что их жизненный цикл короче, чем жизненный цикл ViewModel и может произойти утечка памяти.</p>
+<p>Так будет получен экземпляр <strong>PlayerViewModel</strong>, который не будет создаваться заново после пересоздания активити, например, при перевороте.</p>
+<aside class="warning"><p><strong>Внимание.</strong> Не стоит передавать в экземпляр ViewModel ссылку на Context (активити тоже Context), потому что их жизненный цикл короче, чем жизненный цикл ViewModel и может произойти утечка памяти.</p>
 </aside>
-<p class="image-container">Общаться из ViewModel с активити можно используя класс <strong>LiveData</strong>:</p>
+<p>Общаться из ViewModel с активити можно используя класс <strong>LiveData</strong>:</p>
 <h3><strong>PlayerViewModel.kt</strong></h3>
 <pre><code>class PlayerViewModel : ViewModel(), IPlayerPresenter {
     
@@ -525,10 +523,17 @@ viewModel.trackTitle.observe(this, Observer { newTitle -&gt;
     
       <google-codelab-step label="Домашнее задание" duration="0">
         <ol type="1" start="1">
-<li>Выпилить ручное слежение за жизненным циклом активити и внедрить библиотеку Moxy или ViewModel</li>
-<li>Добавить отображение картинки на страницу плеера</li>
+<li>Заменить ручное слежение за жизненным циклом активити и внедрить библиотеку Moxy или ViewModel</li>
+<li>Добавить для каждой песни отображение своей картинки на страницу плеера. Для решения этой задачи можно изменить класс <strong>Repository</strong> в пакете <strong>model</strong>. </li>
 <li>Поправить отображение текущей длительности так чтобы она была в формате HH:mm:ss</li>
 </ol>
+<aside class="special"><p><strong>Способы получения картинки</strong></p>
+<ol type="1" start="1">
+<li>Самый простой - добавить картинки в ресурсы проекта</li>
+<li>Хорошей практикой считается получение картинки по URL c использованием библиотек Picasso, Glide или подобных. Эти библиотеки умеют асинхронно получить картинку, закешировать её и вставить в View. Звучит сложно, но на деле им нужно передать только URL и View куда вставить картинку</li>
+</ol>
+<p><em>Вы можете выбрать любой способ, но, возможно, второй вам пригодится в проекте и поэтому было бы полезно попробовать именно его.</em></p>
+</aside>
 
 
       </google-codelab-step>
