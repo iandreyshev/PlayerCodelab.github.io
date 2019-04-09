@@ -21,15 +21,17 @@
 </head>
 <body>
   <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
-  <google-codelab title=""
+  <google-codelab codelab-gaid=""
+                  id=""
+                  title=""
                   environment="web"
                   feedback-link="">
     
       <google-codelab-step label="Введение" duration="0">
-        <p>В 2019 году сложно вспомнить приложение, которое обходится без многопоточности. Любое, работающее с интернетом приложение должно ждать отклика от сервера, приложения, совершающие долгие вычисления (например, чтобы накинуть фильтр на ваше селфи) должны ждать их окончания, а затем показать результат и т.д.</p>
-<p>Основной проблемой здесь является то, что <strong>пока происходит длительная операция, в интерфейсе приложения необходимо отображать ее текущее состояние</strong>.</p>
-<p>В Android предусмотрены стандартные инструменты для использования многопоточности, однако, они являются очень неудобными и большинство разработчиков используют сторонние библиотеки. <strong>В своей основе такие библиотеки все равно используют стандартные примитивы многопоточности</strong>, но предоставляют более удобный API для работы с ними.</p>
-<p><strong>Чтобы научиться основам использования многопоточности и получить представление, что использовать в своем проекте</strong>, мы посмотрим пример с использованием стандартных инструментов, поймем, чем они неудобны, а затем внедрим стороннее решение.</p>
+        <p class="image-container">В 2019 году сложно вспомнить приложение, которое обходится без многопоточности. Любое, работающее с интернетом приложение должно ждать отклика от сервера, приложения, совершающие долгие вычисления (например, чтобы накинуть фильтр на ваше селфи) должны ждать их окончания, а затем показать результат и т.д.</p>
+<p class="image-container">Основной проблемой здесь является то, что <strong>пока происходит длительная операция, в интерфейсе приложения необходимо отображать ее текущее состояние</strong>.</p>
+<p class="image-container">В Android предусмотрены стандартные инструменты для использования многопоточности, однако, они являются очень неудобными и большинство разработчиков используют сторонние библиотеки. <strong>В своей основе такие библиотеки все равно используют стандартные примитивы многопоточности</strong>, но предоставляют более удобный API для работы с ними.</p>
+<p class="image-container"><strong>Чтобы научиться основам использования многопоточности и получить представление, что использовать в своем проекте</strong>, мы посмотрим пример с использованием стандартных инструментов, поймем, чем они неудобны, а затем внедрим стороннее решение.</p>
 <h3><strong>Чему вы научитесь</strong></h3>
 <ol type="1" start="1">
 <li>Узнаете о примитивах работы с многопоточностью в Android</li>
@@ -41,37 +43,32 @@
       </google-codelab-step>
     
       <google-codelab-step label="Настройка окружения" duration="0">
-        <p>Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом:</p>
+        <p class="image-container">Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом:</p>
 <pre>$ git clone https://github.com/iandreyshev/ips_andorid_2019_multithreading.git</pre>
-<p>или скачайте ZIP:</p>
+<p class="image-container"><br>или скачайте ZIP:</p>
 <p><a href="https://github.com/iandreyshev/ips_andorid_2019_multithreading/archive/master.zip" target="_blank"><paper-button class="colored" raised>Скачать ZIP</paper-button></a></p>
-<aside class="warning"><p><strong>Проверка. </strong>Проект должен состоять из:</p>
-<ol type="1" start="1">
-<li>Модуль <strong>app</strong>: содержит код приложения, не использующего библиотеки </li>
-</ol>
-</aside>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Главный поток" duration="0">
-        <p>При старте приложения в Android запускается новый процесс, который содержит как минимум один поток - <strong>главный поток</strong> (он же <strong>UI поток</strong>, <strong>Main thread</strong>). В этом потоке начинает выполняться код приложения.</p>
-<p><img style="width: 459.50px" src="img\d70e5f56d2b37133.png"></p>
-<p><strong>Главный поток </strong>отвечает за отрисовку пользовательского интерфейса в приложении.</p>
-<p>Для того чтобы отрисовка экрана была плавной необходимо, чтобы на отрисовку каждого кадра уходило не больше <strong>16 миллисекунд</strong>.</p>
-<aside class="special"><p><strong>60fps = 1000ms / 60f = 16,6ms</strong></p>
+        <p class="image-container">При старте приложения в Android запускается новый процесс, который содержит как минимум один поток - <strong>главный поток</strong> (он же <strong>UI поток</strong>, <strong>Main thread</strong>). В этом потоке начинает выполняться код приложения.</p>
+<p class="image-container"><img style="width: 459.50px" src="img\d70e5f56d2b37133.png"></p>
+<p class="image-container"><strong>Главный поток </strong>отвечает за отрисовку пользовательского интерфейса в приложении.</p>
+<p class="image-container">Для того чтобы отрисовка экрана была плавной необходимо, чтобы на отрисовку каждого кадра уходило не больше <strong>16 миллисекунд</strong>.</p>
+<aside class="special"><p class="image-container"><strong>60fps = 1000ms / 60f = 16,6ms</strong></p>
 </aside>
-<p>Если приложение не успевает выполнить код меньше чем за 16 ms, то следующие кадры будут теряться и интерфейс перестанет работать плавно.</p>
-<p><img style="width: 602.00px" src="img\58b1268e74d96f59.png"></p>
-<p><strong>На этом примере заметно, что потеря кадров будет видна пользователю:</strong></p>
-<p><img style="width: 390.50px" src="img\7aee4ea65daf8d10.gif"></p>
+<p class="image-container">Если приложение не успевает выполнить код меньше чем за 16 ms, то следующие кадры будут теряться и интерфейс перестанет работать плавно.</p>
+<p class="image-container"><img style="width: 602.00px" src="img\58b1268e74d96f59.png"></p>
+<p class="image-container"><strong>На этом примере заметно, что потеря кадров будет видна пользователю:</strong></p>
+<p class="image-container"><img style="width: 390.50px" src="img\7aee4ea65daf8d10.gif"></p>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Создание фонового потока" duration="0">
-        <p>Однако, при разработке, вы заметите, что одного потока не достаточно. Как уже говорилось в введении, приложениям часто приходится выполнять длительные операции. Давайте посмотрим, что произойдет, если длительная операция начнет выполняться в главном потоке:</p>
-<h3><strong>LongRunningOperationActivity.kt</strong></h3>
+        <p class="image-container">Однако, при разработке, вы заметите, что одного потока не достаточно. Как уже говорилось в введении, приложениям часто приходится выполнять длительные операции. Давайте посмотрим, что произойдет, если длительная операция начнет выполняться в главном потоке:</p>
+<p class="image-container"><strong>LongRunningOperationActivity.kt</strong></p>
 <pre><code>class LongRunningOperationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,22 +81,22 @@
     }
 
 }</code></pre>
-<p>После нажатия на кнопку можно заметить, что ее анимация приостановилась. Это происходит потому что главный поток засыпает на 3 секунды и не может отрисовывать новые кадры.</p>
-<p>Самое худшее, что может произойти - пользователь увидит ошибку <strong>Application Not Responding. </strong>Операционная система выведет эту ошибку, если <strong>приложение не будет отвечать на пользовательский ввод в течении 5 секунд.</strong></p>
-<p>Попробуйте приостановить поток на 6 секунд и в это время еще раз нажмите на кнопку - операционная система должна вывести такую ошибку:</p>
-<p><img style="width: 327.50px" src="img\803eca3217351dda.png"></p>
-<p>Обычный запрос на сервер, например, чтобы вызвать такси по вашему адресу, может занимать около минуты или даже больше. Мы не можем позволить себе приостановить главный поток на такой промежуток времени. Из-за этого пользователю может хотеться удалить наше приложение.</p>
-<p>Чтобы не замедлять главный поток, в Android существует возможность создать дополнительный поток, операции на котором не будут замедлять рисование интерфейса. Для этого используется абстракция <strong>java.lang.Thread.</strong></p>
-<p><img style="width: 567.50px" src="img\bb35998689618c81.png"></p>
-<aside class="warning"><p>Для продолжения измените <strong>AndroidManifest.xml</strong> так, чтобы первой операцией которая запускается стала <strong>AuthorizationActivity</strong></p>
+<p class="image-container">После нажатия на кнопку можно заметить, что ее анимация приостановилась. Это происходит потому что главный поток засыпает на 3 секунды и не может отрисовывать новые кадры.</p>
+<p class="image-container">Самое худшее, что может произойти - пользователь увидит ошибку <strong>Application Not Responding. </strong>Операционная система выведет эту ошибку, если <strong>приложение не будет отвечать на пользовательский ввод в течении 5 секунд.</strong></p>
+<p class="image-container">Попробуйте приостановить поток на 6 секунд и в это время еще раз нажмите на кнопку - операционная система должна вывести такую ошибку:</p>
+<p class="image-container"><img style="width: 327.50px" src="img\803eca3217351dda.png"></p>
+<p class="image-container">Обычный запрос на сервер, например, чтобы вызвать такси по вашему адресу, может занимать около минуты или даже больше. Мы не можем позволить себе приостановить главный поток на такой промежуток времени. Из-за этого пользователю может хотеться удалить наше приложение.</p>
+<p class="image-container">Чтобы не замедлять главный поток, в Android существует возможность создать дополнительный поток, операции на котором не будут замедлять рисование интерфейса. Для этого используется абстракция <strong>java.lang.Thread.</strong></p>
+<p class="image-container"><img style="width: 567.50px" src="img\bb35998689618c81.png"></p>
+<aside class="warning"><p class="image-container">Для продолжения измените <strong>AndroidManifest.xml</strong> так, чтобы первой операцией которая запускается стала <strong>AuthorizationActivity</strong></p>
 </aside>
-<p>Как правило, метод авторизации является длительной операцией, потому что приложению нужно обратиться к сервису авторизации, который может находиться удаленно. Поэтому мы должны создать отдельный поток для выполнения кода авторизации.</p>
-<p>Напишем метод <strong>AuthorizationModel.signIn(String, String)</strong> так, чтобы создавался отдельный поток, в котором будет выполняться длительная операция:</p>
+<p class="image-container">Как правило, метод авторизации является длительной операцией, потому что приложению нужно обратиться к сервису авторизации, который может находиться удаленно. Поэтому мы должны создать отдельный поток для выполнения кода авторизации.</p>
+<p class="image-container">Напишем метод <strong>AuthorizationModel.signIn(String, String)</strong> так, чтобы создавался отдельный поток, в котором будет выполняться длительная операция:</p>
 <pre><code>fun signIn(login: String, password: String) {
     val thread = Thread()
     thread.start()
 }</code></pre>
-<p>Чтобы поток запустил операцию, ее нужно представить в виде интерфейса <strong>java.lang.Runnable:</strong></p>
+<p class="image-container">Чтобы поток запустил операцию, ее нужно представить в виде интерфейса <strong>java.lang.Runnable:</strong></p>
 <pre><code>mIsWait = true
 mPresenter?.waitSignIn(mIsWait)
 
@@ -113,28 +110,28 @@ val longRunningOperation = Runnable {
 
 val thread = Thread(longRunningOperation)
 thread.start()</code></pre>
-<p>После вызова <strong>Thread.start()</strong> поток выполняет работу и после того как она завершилась, он умирает:</p>
-<p><img style="width: 312.50px" src="img\7e8204b364e26c5d.png"></p>
-<p><strong>Соберем приложение и запустим его на устройстве:</strong></p>
-<p><img style="width: 146.34px" src="img\c6be075c5de7e27e.png"><img style="width: 149.65px" src="img\d0e872e8974ec951.png"></p>
-<p><img style="width: 335.00px" src="img\de32e119062107d1.png"></p>
-<p>По прошествию времени, мы видим еще одну распространенную ошибку при работе с многопоточностью. <strong>Мы обратились к View из потока отличного от главного. </strong>Элементы интерфейса в Android не являются thread-safe, поэтому с ними можно работать только из главного потока.</p>
-<aside class="warning"><p><strong>Важно! Элементы интерфейса не являются thread-safe</strong>. С ними можно работать только из главного потока. Одной из причин такой реализации UI является ускорение производительности отрисовки.</p>
+<p class="image-container">После вызова <strong>Thread.start()</strong> поток выполняет работу и после того как она завершилась, он умирает:</p>
+<p class="image-container"><img style="width: 312.50px" src="img\7e8204b364e26c5d.png"></p>
+<p class="image-container"><strong>Соберем приложение и запустим его на устройстве:</strong></p>
+<p class="image-container"><img style="width: 146.34px" src="img\c6be075c5de7e27e.png"><img style="width: 149.65px" src="img\d0e872e8974ec951.png"></p>
+<p class="image-container"><img style="width: 335.00px" src="img\de32e119062107d1.png"></p>
+<p class="image-container">По прошествию времени, мы видим еще одну распространенную ошибку при работе с многопоточностью. <strong>Мы обратились к View из потока отличного от главного. </strong>Элементы интерфейса в Android не являются thread-safe, поэтому с ними можно работать только из главного потока.</p>
+<aside class="warning"><p class="image-container"><strong>Важно! Элементы интерфейса не являются thread-safe</strong>. С ними можно работать только из главного потока. Одной из причин такой реализации UI является ускорение производительности отрисовки.</p>
 </aside>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Взаимодействие с UI из фонового потока" duration="0">
-        <h2><strong>Как написать код, который вызовет элементы интерфейса в главном потоке?</strong></h2>
-<p>Платформа Android определяет собственный механизм передачи сообщений между потоками. Механизм передачи сообщений реализует не блокирующий шаблон <strong>производитель-потребитель</strong>, когда ни поток-производитель, ни поток-потребитель не устанавливают блокировки во время обработки сообщений.</p>
-<p>Механизм обработки сообщений является основном на платформе Android, поэтому соответствующий программный интерфейс расположен в пакете <strong>android.os</strong> и содержит набор классов реализующих функциональные свойства механизма.</p>
-<p><img style="width: 602.00px" src="img\bd02c18c451a4873.png"></p>
-<p><strong>android.os.Looper</strong> - диспетчер сообщений, связанный только с одним потоком-потребителем. Передает задачи в поток с которым связан.</p>
-<p><strong>android.os.Handler</strong> - обработчик сообщений потока-потребителя и соответствующий интерфейс для потока-производителя, позволяющий помещать сообщения в очередь.</p>
-<p><strong>android.os.MessageQueue</strong> - неограниченный по размеру связанный список сообщений, который должен обрабатываться в потоке-потребителе</p>
-<p><strong>android.os.Message</strong> - сообщение, которое должен обрабатывать поток-потребитель</p>
-<p><strong>Главный поток, является HandlerThread`ом</strong> - у него есть Looper и MessageQueue в которую можно передавать сообщения, чтобы запустить операцию на главном потоке:</p>
+        <p class="image-container"><strong>Как написать код, который вызовет элементы интерфейса в главном потоке?</strong></p>
+<p class="image-container">Платформа Android определяет собственный механизм передачи сообщений между потоками. Механизм передачи сообщений реализует не блокирующий шаблон <strong>производитель-потребитель</strong>, когда ни поток-производитель, ни поток-потребитель не устанавливают блокировки во время обработки сообщений.</p>
+<p class="image-container">Механизм обработки сообщений является основном на платформе Android, поэтому соответствующий программный интерфейс расположен в пакете <strong>android.os</strong> и содержит набор классов реализующих функциональные свойства механизма.</p>
+<p class="image-container"><img style="width: 602.00px" src="img\bd02c18c451a4873.png"></p>
+<p class="image-container"><strong>android.os.Looper</strong> - диспетчер сообщений, связанный только с одним потоком-потребителем. Передает задачи в поток с которым связан.</p>
+<p class="image-container"><strong>android.os.Handler</strong> - обработчик сообщений потока-потребителя и соответствующий интерфейс для потока-производителя, позволяющий помещать сообщения в очередь.</p>
+<p class="image-container"><strong>android.os.MessageQueue</strong> - неограниченный по размеру связанный список сообщений, который должен обрабатываться в потоке-потребителе</p>
+<p class="image-container"><strong>android.os.Message</strong> - сообщение, которое должен обрабатывать поток-потребитель</p>
+<p class="image-container"><strong>Главный поток, является HandlerThread`ом</strong> - у него есть Looper и MessageQueue в которую можно передавать сообщения, чтобы запустить операцию на главном потоке:</p>
 <pre><code>mIsWait = true
 mPresenter?.waitSignIn(mIsWait)
 
@@ -152,18 +149,18 @@ val longRunningOperation = Runnable {
 
 val thread = Thread(longRunningOperation)
 thread.start()</code></pre>
-<p>Метод Handler.post() принимает операцию, которая будет запущена на главном потоке.</p>
-<p>В этом примере использование java.lang.Thread выглядит нормально и не занимает много кода. Попробуем на втором экране написать длительную операцию, которая имеет прогресс выраженный в процентах. Этот прогресс необходимо отображать на странице.</p>
-<p>Примером такой операции является скачивание приложения в Google Play Market:</p>
-<p><img style="width: 272.99px" src="img\2b00328e6de2f033.png"><img style="width: 277.55px" src="img\5206e7a092ce336.png"></p>
+<p class="image-container">Метод Handler.post() принимает операцию, которая будет запущена на главном потоке.</p>
+<p class="image-container">В этом примере использование java.lang.Thread выглядит нормально и не занимает много кода. Попробуем на втором экране написать длительную операцию, которая имеет прогресс выраженный в процентах. Этот прогресс необходимо отображать на странице.</p>
+<p class="image-container">Примером такой операции является скачивание приложения в Google Play Market:</p>
+<p class="image-container"><img style="width: 272.99px" src="img\2b00328e6de2f033.png"><img style="width: 277.55px" src="img\5206e7a092ce336.png"></p>
 
 
       </google-codelab-step>
     
       <google-codelab-step label="Длительная операция с прогрессом" duration="0">
-        <p>На экране приготовления пиццы будем вызывать методы модели при нажатии соответствующих кнопок в интерфейсе.</p>
-<p>Определим метод CookModel.start(String):</p>
-<p><strong>CookModel.kt</strong></p>
+        <p class="image-container">На экране приготовления пиццы будем вызывать методы модели при нажатии соответствующих кнопок в интерфейсе.</p>
+<p class="image-container">Представим тело метода CookModel.start(String):</p>
+<p class="image-container"><strong>CookModel.kt</strong></p>
 <pre><code>fun start(pizza: String) {
     // поменять состояние на начальное
     // создать и запустить поток
@@ -173,7 +170,10 @@ thread.start()</code></pre>
             // увеличить прогресс приготовления
         // закончить приготовление если задача не отменена
 }</code></pre>
-<p>Меняем состояние на начальное при вызове метода <strong>CookModel.start(String)</strong></p>
+<p><br>Состояние представления определяется экземпляром <a href="https://kotlinlang.ru/docs/reference/sealed-classes.html" target="_blank">изолированного класса CookingState</a>. Изолированные классы позволяют использовать безопасное приведение по иерархии наследников, потому что компилятор может определить все варианты приведения. Это показано в методе CookActivity.update(cookingState: CookingState).</p>
+<aside class="special"><p class="image-container">Попробуйте добавить нового наследника класса <strong>CookingState</strong> и скомпилировать проект. Компилятор выдаст ошибку потому что в методе update не будет обработана новая ситуация.</p>
+</aside>
+<p class="image-container"><br>Меняем состояние на начальное при вызове метода CookModel.start(String)</p>
 <pre><code>fun start(pizza: String) {
     mIsCancelled = false
     mState = CookingState.InProgress(MAX_PROGRESS, 0)
@@ -186,7 +186,7 @@ thread.start()</code></pre>
             // увеличить прогресс приготовления
         // закончить приготовление если задача не отменена
 }</code></pre>
-<p>Для создания потока используем вспомогательную функцию из библиотеки <strong>kotlin.concurrent</strong></p>
+<p class="image-container">Для создания потока используем вспомогательную функцию из библиотеки <strong>kotlin.concurrent</strong></p>
 <pre><code>fun start(pizza: String) {
     mIsCancelled = false
     mState = CookingState.InProgress(MAX_PROGRESS, 0)
@@ -206,7 +206,7 @@ thread.start()</code></pre>
         }
     }
 }</code></pre>
-<p>Добавим тело операции</p>
+<p class="image-container">Добавим тело операции</p>
 <pre><code>fun start(pizza: String) {
     mIsCancelled = false
     mState = CookingState.InProgress(MAX_PROGRESS, 0)
@@ -265,16 +265,22 @@ fun delete() {
     mState = CookingState.NotStarted
     mPresenter?.update(mState)
 }</code></pre>
-<aside class="special"><p>Стоит заметить, что мы самостоятельно писали код проверки на отмену операции. В любом случае, используем мы стандартные инструменты или стороннюю библиотеку, если нужно сделать отменяемую операцию, такую логику нужно писать самостоятельно.</p>
+<aside class="special"><p class="image-container">Стоит заметить, что мы самостоятельно писали код проверки на отмену операции. В любом случае, используем мы стандартные инструменты или стороннюю библиотеку, если нужно сделать отменяемую операцию, такую логику нужно писать самостоятельно.</p>
 </aside>
-<aside class="warning"><p>Можно увидеть, что с использованием <strong>thread </strong>и <strong>Handle.post</strong> код получается громоздким с большим количеством колбеков, за которыми сложно следить. </p>
+<aside class="warning"><p class="image-container">Можно увидеть, что с использованием <strong>thread </strong>и <strong>Handle.post</strong> код получается громоздким с большим количеством колбеков, за которыми сложно следить. </p>
 </aside>
-<p>Для реализации длительной операции с возможностью передачи прогресса в главный поток в Android имеется абстракция <strong>AsyncTask</strong>. Для ее использования необходимо создать класс-наследник и переопределить необходимые методы:</p>
-<p><strong>onPreExecute()</strong> - вызывается на главном потоке до начала выполнения операции</p>
-<p><strong>doInBackground(vararg params: String?)</strong> - вызывается в фоновом потоке для выполнения операции</p>
-<p><strong>onProgressUpdate(vararg values: Int?)</strong> - вызывается в главном потоке, после вызова <strong>publishProgress(Int)</strong> в методе<strong> doInBackground()</strong></p>
-<p><strong>onPostExecute(result: CookingState?)</strong> - вызывается в главном потоке, после окончания операции</p>
-<p>Создадим класс <strong>OrderPizzaTask </strong>унаследовав его от AsyncTask&lt;String, Int, CookingState&gt; внутри CookModel. Теперь операция станет выглядеть так:</p>
+<p class="image-container">Можно упростить код используя другую стандартную абстракцию - <strong>AsyncTask.</strong></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="AsyncTask для длительных операций с прогрессом" duration="0">
+        <p class="image-container">Для реализации длительной операции с возможностью передачи прогресса в главный поток в Android имеется абстракция <strong>AsyncTask</strong>. Для ее использования необходимо создать класс-наследник и переопределить необходимые методы:</p>
+<p class="image-container"><strong>onPreExecute()</strong> - вызывается на главном потоке до начала выполнения операции</p>
+<p class="image-container"><strong>doInBackground(vararg params: String?)</strong> - вызывается в фоновом потоке для выполнения операции</p>
+<p class="image-container"><strong>onProgressUpdate(vararg values: Int?)</strong> - вызывается в главном потоке, после вызова <strong>publishProgress(Int)</strong> в методе<strong> doInBackground()</strong></p>
+<p class="image-container"><strong>onPostExecute(result: CookingState?)</strong> - вызывается в главном потоке, после окончания операции</p>
+<p class="image-container">Создадим класс <strong>OrderPizzaTask </strong>унаследовав его от AsyncTask&lt;String, Int, CookingState&gt; внутри CookModel. Теперь операция станет выглядеть так:</p>
 <pre><code>inner class OrderPizzaTask : AsyncTask&lt;String, Int, CookingState&gt;() {
     override fun onPreExecute() {
         super.onPreExecute()
@@ -316,7 +322,7 @@ fun delete() {
         mPresenter?.update(mState)
     }
 }</code></pre>
-<p>Запуск операции тоже изменился, он стало чуть-чуть проще:</p>
+<p class="image-container">Запуск операции тоже изменился, он стало чуть-чуть проще:</p>
 <pre><code>private var mTask: AsyncTask&lt;*, *, *&gt;? = null
 
 fun start(pizza: String) {
@@ -333,20 +339,33 @@ fun delete() {
     mState = CookingState.NotStarted
     mPresenter?.update(mState)
 }</code></pre>
-<p>Код стал гораздо проще, в нем стало легче ориентироваться.</p>
-<aside class="warning"><p><strong>Важно.</strong> Аналогично потокам, AsyncTask нельзя переиспользовать</p>
+<p class="image-container">Код стал гораздо проще, в нем стало легче ориентироваться.</p>
+<aside class="warning"><p class="image-container"><strong>Важно.</strong> Аналогично потокам, AsyncTask нельзя переиспользовать</p>
+</aside>
+<p class="image-container">Если перейти к реализации метода <strong>AsyncTask.execute(T..)</strong>, то можно увидеть, что происходит вызов метода <strong>AsyncTask.executeOnExecutor(ExecutorService, T..)</strong>, в который передается <strong>sDefaultExecutor:</strong></p>
+<p class="image-container"><strong>AsyncTask.java</strong></p>
+<pre><code>@MainThread
+public final AsyncTask&lt;Params, Progress, Result&gt; execute(Params... params) {
+    return executeOnExecutor(sDefaultExecutor, params);
+}</code></pre>
+<p class="image-container"><strong>ExecutorService</strong> это еще одна стандартная абстракция позволяющая работать с многопоточностью. Задача <strong>Executor`а</strong> распределять задачи между несколькими потоками.</p>
+<p class="image-container">ExecutorService исполняет асинхронный код в одном или нескольких потоках. Создание инстанса ExecutorService&#39;а делается либо вручную через конкретные имплементации (ScheduledThreadPoolExecutor или ThreadPoolExecutor), но проще будет использовать фабрики класса Executors. Например, если надо создать пул с 2мя потоками, то делается это так:</p>
+<pre><code>ExecutorService service = Executors.newFixedThreadPool(2);</code></pre>
+<p class="image-container"><br>Если требуется использовать кэширующий пул потоков, который создает потоки по мере необходимости, но переиспользует неактивные потоки (и подчищает потоки, которые были неактивные некоторое время), то это задается следующим образом:</p>
+<pre><code>ExecutorService service = Executors.newCachedThreadPool();</code></pre>
+<aside class="warning"><p class="image-container"><strong>Важно.</strong> Стандартно все экземпляры AsyncTask`ов будут запускаться одним глобальным Executor`ом.</p>
 </aside>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Набор фоновых потоков и ThreadPoolExecutor" duration="0">
-        
-
-      </google-codelab-step>
-    
       <google-codelab-step label="Задание" duration="0">
-        
+        <ol type="1" start="1">
+<li>Пройти по инструкциям</li>
+<li>Реализовать страницу по картинке, при нажатии кнопки должен запускаться AsyncTask, который будет обновлять соответствующий ProgressBar. Все AsyncTask`и должны запускаться в одном Executor`е и выполняться параллельно</li>
+</ol>
+<p class="image-container"><img style="width: 268.77px" src="img\e7f199599010d34.png"></p>
+
 
       </google-codelab-step>
     
