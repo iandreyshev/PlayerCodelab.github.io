@@ -1,0 +1,270 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab title=""
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Введение" duration="0">
+        <p>В предыдущих занятиях мы уже узнали, что у каждого экрана может быть свое состояние, которое нужно сохранять при повороте устройства или его выключении. Однако теперь, мы пойдём дальше и рассмотрим способы хранения данных на диске, так чтобы после выключения приложения мы могли восстановить состояние которое у нас было.</p>
+<p>В Android существует несколько стандартных способов сделать это:</p>
+<ul>
+<li>Использовать key-value хранилище SharedPreferences</li>
+<li>Использовать встроенную базу данных SQLite</li>
+</ul>
+<p>Прежде чем перейти непосредственно к хранению данных, посмотрим как отображать данные в списке, это потребуется чтобы реализовать задуманное приложение.</p>
+<h3><strong>Чему вы научитесь</strong></h3>
+<ol type="1" start="1">
+<li>Отображать списки данных</li>
+<li>Узнаете о стандартном способе сохранения данных после выхода из приложения</li>
+<li>Узнаете о библиотеке ObjectBox для упрощения работы с БД</li>
+<li>Хранить настройки приложения</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Настройка окружения" duration="0">
+        <p>Для выполнения лабораторной работы потребуется клонировать репозиторий с исходным кодом:</p>
+<pre>$ git clone https://github.com/iandreyshev/ips_andorid_2019_persistency.git</pre>
+<p><br>или скачайте ZIP:</p>
+<p><a href="https://github.com/iandreyshev/ips_andorid_2019_persistency/archive/master.zip" target="_blank"><paper-button class="colored" raised>Скачать ZIP</paper-button></a></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Отображение данных в списке" duration="0">
+        <p>Реализация списков тема достаточно большая и всю мы её рассматривать не будем. Остановимся только на одном виде списков - вертикальном с однотипными элементами</p>
+<p>Шире тема списков раскрыта <a href="https://www.youtube.com/watch?v=vGwGVnrjN0w" target="_blank">в этой лекции из Android Academy в Москве</a></p>
+<p>Для отображения списка будем использовать <strong>RecyclerView</strong>. Макет ListActivity уже содержит <strong>android.support.v7.widget.RecyclerView</strong> и вам не нужно его изменять</p>
+<p><strong>RecyclerView </strong>умеет создавать представления (View) элементов списка только в том случае, если они находятся на экране, или не далеко от его краев. То есть, если в списке содержится 100 элементов, а на экране отображается только 3, то внутри списка на экране будет храниться только 3 + N представлений (View), где N это количество, которое создается в запас, для ускорения скроллинга. Стандартно N равно 5. При скроллировании, элементы уходящие с экрана будут переиспользоваться для отображения вновь появившихся.</p>
+<p>Для преобразования программных объектов списка в их визуализацию внутри представления необходимо реализовать <a href="https://refactoring.guru/ru/design-patterns/adapter" target="_blank">паттерн адаптер</a>. Для этого создадим класс <strong>ListAdapter</strong> (уже содержится в исходном коде), унаследованный от класса <strong>RecyclerView.Adapter,</strong> в типовом параметре укажем <strong>NoteViewHolder </strong>(уже содержится в исходном коде), который является наследником<strong> RecyclerView.ViewHolder</strong>.</p>
+<p><img style="width: 602.00px" src="img\f9c4ec14112f7c5e.png"></p>
+<p>ViewHolder необходим чтобы мы могли описать код взаимодействующий непосредственно с представлением (View) элемента списка. Внутри него будет инкапсулирована логика вставки текста заголовка и описания.</p>
+<p>В простейшем варианте внутри класса <strong>ListAdapter</strong> необходимо переопределить три метода: </p>
+<pre><code>// Метод вызывается, когда список создает новое представление
+// для элементов
+override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder
+
+// Внутри этого метода у разработчика есть возможность
+// обновить представление
+// ViewHolder мог использоваться для отображения элемента,
+// который ушел с экрана, здесь можно обновить отображение,
+// например, задать новый заголовок
+override fun onBindViewHolder(viewHolder: NoteViewHolder, position: Int
+
+// Этот метод вызывается, чтобы узнать сколько элементов в
+// отображаемом списке
+override fun getItemCount(): Int</code></pre>
+<p>Вся магия создания элементов внутри представления списка остается под капотом, разработчику нужно только описать код создания элементов и их настройки перед визуализацией.</p>
+<p><img style="width: 602.00px" src="img\c8c4c2aa2c8939ec.png"></p>
+<p>Опишем адаптер ListAdapter. Обратите внимание, что внутри вызова метода update вызывается метод <strong>notifyDataSetChanged()</strong>. С помощью него мы сообщаем списку, что данные изменились и нужно заново отрисовать элементы списка.</p>
+<p><strong>ListAdapter.kt</strong></p>
+<pre><code>class ListAdapter : RecyclerView.Adapter&lt;NoteViewHolder&gt;() {
+    private var mNotesToDisplay: List&lt;DomainNote&gt; = listOf()
+
+    fun update(notes: List&lt;DomainNote&gt;) {
+        mNotesToDisplay = notes
+        notifyDataSetChanged()
+    }    
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_note, parent, false)
+        return NoteViewHolder(view)
+    }
+
+    override fun onBindViewHolder(viewHolder: NoteViewHolder, position: Int) {
+        val noteToBind = mNotesToDisplay[position]
+        viewHolder.updateTitle(noteToBind.title)
+        viewHolder.updateDescription(noteToBind.description)
+        viewHolder.updateDate(noteToBind.dateInMillis)
+        viewHolder.itemView.setOnClickListener {
+        noteToBind.listener?.onOpen()
+    }
+}
+
+    override fun getItemCount(): Int = mNotesToDisplay.count()
+}</code></pre>
+<p>Внутри <strong>NoteViewHolder </strong>опишем логику обновления заголовка и описания. В нашем случае это будет очень простой код:</p>
+<p><strong>NoteViewHolder.kt</strong></p>
+<pre><code>class NoteViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    fun updateTitle(title: String) {
+        itemView.title.text = title
+    }
+
+    fun updateDescription(description: String) {
+        itemView.description.text = description
+    }
+
+    fun updateDate(dateInMillis: Long) {
+        itemView.date.text = DateFormat.format(&#34;dd.MM.yyyy HH:mm&#34;, dateInMillis)
+    }
+}</code></pre>
+<p>Теперь при запуске приложения вы сможете добавлять записи и открывать их для редактирования:</p>
+<p><img style="width: 245.35px" src="img\89694fe5fdbd7949.png"><img style="width: 244.72px" src="img\8df0698d082d5371.png"></p>
+<p>Внутри пакета storage вы можете найти интерфейс <strong>IStorage</strong>, к которому происходит обращение, когда вы сохраняете, редактируете или удаляете запись. Текущей реализацией является <strong>MemoryStorage</strong>, внутри этого класса заметки сохраняются в список, который пересоздается после перезапуска приложения.</p>
+<aside class="special"><p>Сейчас экземпляр <strong>MemoryStorage </strong>существует пока существует экземпляр NoteApp. Попробуйте добавить записи и выгрузить приложение из памяти. После повторного открытия список записей будет пуст.</p>
+</aside>
+<p><br>Интерфейс <strong>IStorage </strong>имеет метод <strong>listObservable()</strong>, который возвращает экземпляр класса <strong>Observable из библиотеки RxJava2</strong>. Библиотека предоставляет доступ к абстракциям реактивного программирования. Мы используем её, чтобы не писать самостоятельно код подписки и отписки, как это было в предыдущих примерах. Во второй части примера будет показано, как использовать библиотеку для обработки асинхронных операций.</p>
+<aside class="special"><p>RxJava - это конкретная реализация технологии реактивного программирования. В RxJava отдается предпочтение композиции функций без глобального состояния и побочных эффектов, а также применению потоков для составления асинхронных событийно-ориентированных программ. За основу взят паттерн Наблюдатель, абстрагирующий обратные вызовы производителя и потребителя, а затем расширен десятками операторов.</p>
+</aside>
+<p><br>Если вы посмотрите на класс <strong>MemoryStorage</strong>, то увидите, что внутри него используется <strong>PublishSubject</strong>, этот объект необходим, чтобы уведомлять подписчиков после изменения списка заметок.</p>
+<pre><code>private var mPublishSubject = PublishSubject.create&lt;List&lt;Note&gt;&gt;()</code></pre>
+<p><br>У класса <strong>ToDoApplication</strong> тоже есть метод <strong>listObservable()</strong>. Внутри этого метода с помощью оператора <strong>map</strong> заметки преобразуются из модели слоя хранилища, в модель, которая используется в слое интерфейса и бизнес логики.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Стандартный способ хранения данных" duration="0">
+        <p>Платформа Android имеет встроенный инструментарий для управления базой данных sqlite3. SQLite - это проект с открытыми исходными кодами, поддерживающий стандартные возможности обычной SQL: синтаксис, транзакции и др. Занимает очень мало места - около 250 кб. Домашняя страница SQLite: <a href="http://www.sqlite.org" target="_blank">http://www.sqlite.org</a>.</p>
+<p><img style="width: 602.00px" src="img\ca4b7471619a05a2.png"></p>
+<p>При использовании SQLite существует ряд проблем, которые усложняют и замедляют работу с кодом:</p>
+<ul>
+<li>Большое количество однотипного кода</li>
+<li>Код работы с SQLite не проверяется на стадии компиляции</li>
+</ul>
+<p>Для реализации проектов проще использовать обертки над SQLite или другие библиотеки для хранения данных на диске. Мы не будем углубленно рассматривать работу с SQLite потому что существуют более удобные решения для реализации базы данных.</p>
+<p>Если вам интересно разобраться, как работать с SQLite в Android, вы можете посмотреть <a href="https://www.youtube.com/watch?v=1z7KP-Xv8LA" target="_blank">этот видео урок</a>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Библиотека ObjectBox" duration="0">
+        <p><strong>Почему именно ObjectBox?</strong></p>
+<p>Для небольших приложений нет разницы, какую локальную базу данных вы будете использовать. Например, вы можете использовать голый SQLite или новую обертку над ним от Google - <a href="https://developer.android.com/topic/libraries/architecture/room" target="_blank">Room Persistence Library</a> или другие решения: Realm, GreenDAO и т.д. В уроке выбран ObjectBox, потому что это очень простая библиотека, подходящая к нашим потребностям, которая потребует минимум времени на изучение.</p>
+<p><strong>ObjectBox использует NoSQL базу данных</strong> и предоставляет API использующий пользовательские классы, то есть без использования строковых SQL запросов, как это пришлось бы делать на голом SQLite.</p>
+<p>Для начала подключим библиотеку к проекту. Инструкция имеется на <a href="https://docs.objectbox.io/getting-started" target="_blank">официальном сайте</a>. Все остальные инструкции тоже имеются на официальном сайте, но мы пошагово разберем как реализовать сохранение данных.</p>
+<p>Сделаем класс Task из уровня хранилища пригодным для сохранения в базе ObjectBox. Для этого нужно:</p>
+<ol type="1" start="1">
+<li>отметить его аннотацией @Entity</li>
+<li>добавить аннотацию @Id к полю id</li>
+<li>сделать все поля изменяемыми (это необходимо, чтобы библиотека могла настроить поля после чтения из базы)</li>
+</ol>
+<pre><code>@Entity
+data class Note(
+    @Id
+    var id: Long,
+    var title: String,
+    var description: String,
+    var creationDateInMillis: Long
+)</code></pre>
+<p><br>Внутри класса ObjectBoxStorage добавьте поля:</p>
+<pre><code>private val mBoxStore = MyObjectBox.builder().androidContext(context).build()
+private val mNotesBox = mBoxStore.boxFor(Note::class.java)</code></pre>
+<p><br>Класс MyObjectBox вначале будет недоступен, потому что он должен сгенерироваться. Для этого в верхнем меню Android Studio выберете <strong>Build-&gt;Make Project</strong>.</p>
+<p>Теперь переменная mNotesBox хранит ссылку на экземпляр <strong>Box&lt;Note&gt;</strong>. Класс Box предоставляет доступ к хранимой в базе информации. Реализуем методы класса <strong>ObjectBoxStorage</strong>:</p>
+<pre><code>// После добавления библиотека сама обновит id добавляемого объекта
+override fun add(note: Note): Note {
+    mNotesBox.put(note)
+    mPublishSubject.onNext(mNotesBox.all)
+    return note
+}
+
+// Для обновления объекта в базе используется метод put, как в случае с добавлением
+// передаваемый объект должен иметь id, как у объекта, который будет обновлен
+override fun update(id: Long, note: Note) {
+    note.id = id
+    mNotesBox.put(note)
+    mPublishSubject.onNext(mNotesBox.all)
+}
+
+override fun delete(id: Long) {
+    mNotesBox.remove(id)
+    mPublishSubject.onNext(mNotesBox.all)
+}
+
+override fun list(): List&lt;Note&gt; = mNotesBox.all
+
+override fun listObservable(): Observable&lt;List&lt;Note&gt;&gt; = mPublishSubject</code></pre>
+<p><br>Можно видеть, что код очень простой. Теперь попробуйте добавить записи и перезапустить приложение, они должны сохраняться.</p>
+<p>Используя библиотеку можно получать данные составляя запросы похожие на SQL, например если мы хотим получить список отсортированный по дате создания:</p>
+<pre><code>// Если во время создания запроса нужно указать поле, используется
+// сгенерированный класс Note_
+private fun getAll(): List&lt;Note&gt; {
+    return mNotesBox.query()
+        .order(Note_.creationDateInMillis, OrderFlags.DESCENDING)
+        .build()
+        .find()
+}</code></pre>
+<p><br>ObjectBox позволяет создавать связи между объектами, предоставляет API для наблюдения текущего состояния объектов (уведомляет наблюдателей при любых изменениях в базе), позволяет иметь в полях хранимых сущностей не сериализуемые типы данных (нужно реализовать конвертер в примитивные типы) и т.д.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Хранение настроек (Shared Preferences)" duration="0">
+        <p>Для хранения небольших настроек приложения можно использовать интерфейс <strong>SharedPreferences</strong>, получаемый из метода <strong>Context.getSharedPreferences()</strong>. В настройках можно хранить небольшую информацию по ключу. </p>
+<aside class="special"><p>На диске настройки хранятся в xml файлах расположенных по этому пути:</p>
+<p>/data/data/YOUR_PACKAGE_NAME/shared_prefs/YOUR_PREFS_NAME.xml</p>
+</aside>
+<p><br>Мы будем хранить в SharedPreferences вид сортировки списка записей - сначала новые или сначала старые.</p>
+<p>Пользователь сможет выбирать вид сортировки в контекстном меню на экране списка записей. Добавьте такое меню и обработку выбора сортировки:</p>
+<p><img style="width: 384.00px" src="img\87b582fed2f2b917.gif"></p>
+<p>Создадим метод в интерфейсе IStorage, который будет сохранять вид сортировки в SharedPreferences и реализуем его в классе ObjectBoxStorage:</p>
+<pre><code>private val mOrderPreferences = context.getSharedPreferences(&#34;ORDER_PREFS&#34;, Context.MODE_PRIVATE)
+
+override fun setOrder(isDescending: Boolean) {
+    mOrderPreferences.edit()
+        .putBoolean(ORDER_KEY, isDescending)
+        .commit()
+    mPublishSubject.onNext(getAll())
+}
+
+companion object {
+    private const val ORDER_KEY = &#34;order.key&#34;
+}</code></pre>
+<p><br>Теперь добавим приватный метод для получения списка всех записей из базы данных, который будет использовать SharedPreferences:</p>
+<pre><code>private fun getAll(): List&lt;Note&gt; {
+    val queryBuilder = mNotesBox.query()
+
+    if (mOrderPreferences.getBoolean(ORDER_KEY, false)) {
+        queryBuilder.order(Note_.creationDateInMillis, OrderFlags.DESCENDING)
+    }
+
+    return queryBuilder.build().find()
+}</code></pre>
+<aside class="special"><p>Используя SharedPreferences можно сохранять только те данные, которые могут быть сериализованы</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Задание" duration="0">
+        <ol type="1" start="1">
+<li>Реализовать отображение списка записей</li>
+<li>Реализовать ObjectBoxStorage (можно попробовать любую другую библиотеку. Лучше использовать то, что используете в проекте)</li>
+<li>Добавить сохранение порядка сортировки используя SharedPreferences</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+
+</body>
+</html>
